@@ -15,4 +15,4 @@ license = {text = "MIT"}
 distribution = false
 
 [tool.pdm.scripts]
-start = "python dsss/main.py"
+start = "python -m dsss.main"
