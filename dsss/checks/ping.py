@@ -1,17 +1,25 @@
+import socket
+import aioping
 from typing import override
-import asyncio
 
 from dsss.checks.base import BaseCheck
 
 
 class PingCheck(BaseCheck):
+    def __init__(self, host: str, timeout_seconds: int) -> None:
+        super().__init__(host, None, timeout_seconds=timeout_seconds)
+
     @override
-    async def check(self) -> tuple[bool, str]:
-        reader, writer = await asyncio.open_connection("127.0.0.1", 8888)
-        writer.write("hello, world".encode())
-        await writer.drain()
-
-        writer.close()
-        await writer.wait_closed()
-
-        return (True, "BASED")
+    async def check(self) -> tuple[bool, str | None]:
+        try:
+            delay_ms: int = (
+                await aioping.ping(
+                    self.host,
+                    timeout=self.timeout_seconds,
+                    family=socket.AddressFamily.AF_INET,
+                )
+                * 1000
+            )
+            return (True, f"ping took {delay_ms}ms")
+        except TimeoutError:
+            return (False, "timeout")

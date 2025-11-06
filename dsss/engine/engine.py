@@ -9,8 +9,9 @@ from dsss.config import Config
 from dsss.service import Service
 from dsss.team import Team
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 class Engine:
@@ -59,12 +60,19 @@ class Engine:
                 f"Round {self.current_round} completed in {time_taken:01.5f} seconds"
             )
 
-            await asyncio.sleep(self.config.target_round_time)
+            time_to_sleep = self.config.target_round_time - time_taken
+
+            if time_to_sleep < 0:
+                logger.warning(
+                    f"Round checks took longer than specified target round time of {self.config.target_round_time} seconds by {abs(time_to_sleep):01.2f} seconds"
+                )
+
+            await asyncio.sleep(max(0, time_to_sleep))
 
     async def run_round(self):
         self.current_round += 1
 
-        tasks: list[Task[tuple[str, str, bool, str]]] = []
+        tasks: list[Task[tuple[str, str, bool, str | None]]] = []
         for _, team in self.config.teams.items():
             for _, service in team.services.items():
                 tasks.append(asyncio.create_task(self._run_check(team, service)))
@@ -131,7 +139,7 @@ class Engine:
     # tuple[team, service, success, message]
     async def _run_check(
         self, team: Team, service: Service
-    ) -> tuple[str, str, bool, str]:
+    ) -> tuple[str, str, bool, str | None]:
         try:
             success, msg = await asyncio.wait_for(
                 service.check.check(),
@@ -143,12 +151,14 @@ class Engine:
         except Exception as e:
             return (team.name, service.name, False, f"Error: {e}")
 
-    def _store_results(self, round_id: int, results: list[tuple[str, str, bool, str]]):
+    def _store_results(
+        self, round_id: int, results: list[tuple[str, str, bool, str | None]]
+    ):
         with self.db:
             _ = self.db.executemany(
                 "INSERT INTO results (round, team, service, success, message, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
                 [
-                    (round_id, team, service, int(success), msg, time.time())
+                    (round_id, team, service, int(success), msg or "", time.time())
                     for team, service, success, msg in results
                 ],
             )

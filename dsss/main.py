@@ -23,7 +23,7 @@ def make_team(name: str, service_list: list[tuple[str, int, BaseCheck]]) -> Team
 
 async def main():
     service_defs = [
-        ("Ping", 100, PingCheck()),
+        ("Ping", 100, PingCheck("1.1.1.1", 5)),
     ]
 
     team_names = [f"Team{i}" for i in range(1, 100)]
