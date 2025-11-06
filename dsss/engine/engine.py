@@ -1,17 +1,14 @@
 import time
 import sqlite3
 import asyncio
-import logging
-import sys
 from asyncio import Task
 
 from dsss.config import Config
 from dsss.service import Service
 from dsss.team import Team
+from dsss.logger import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler(sys.stdout))
+logger = get_logger("Engine")
 
 
 class Engine:
@@ -21,10 +18,14 @@ class Engine:
     paused: bool
     current_round: int
 
+    # epoch time when last round finished
+    last_round_finished: float
+
     def __init__(self, config: Config) -> None:
         self.config = config
         self.paused = False
         self.current_round = 0
+        self.last_round_finished = time.time()
 
         self.db = sqlite3.connect(self.config.database_path)
         _ = self.db.execute("""
@@ -67,6 +68,7 @@ class Engine:
                     f"Round checks took longer than specified target round time of {self.config.target_round_time} seconds by {abs(time_to_sleep):01.2f} seconds"
                 )
 
+            self.last_round_finished = time.time()
             await asyncio.sleep(max(0, time_to_sleep))
 
     async def run_round(self):
@@ -79,6 +81,11 @@ class Engine:
 
         results = await asyncio.gather(*tasks)
         self._store_results(self.current_round, results)
+
+    def get_time_to_next_round(self) -> float:
+        return max(
+            0, self.config.target_round_time - (time.time() - self.last_round_finished)
+        )
 
     def get_scores_round(self, round_id: int) -> dict[str, int]:
         """
@@ -132,7 +139,9 @@ class Engine:
 
         for team in rounds:
             max_round = max(rounds[team].keys())
-            rounds_list[team] = [rounds[team].get(i, 0) for i in range(max_round + 1)]
+            rounds_list[team] = [rounds[team].get(i, 0) for i in range(max_round + 1)][
+                1::
+            ]
 
         return rounds_list
 
