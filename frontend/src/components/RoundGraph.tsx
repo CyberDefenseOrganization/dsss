@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis, type TooltipContentProps } from "recharts";
 
 const RoundTooltip = ({ active, payload, label }: TooltipContentProps<string | number, string>) => {
@@ -58,6 +59,33 @@ function RoundGraph({ numRounds, roundData }: { numRounds: number, roundData: Re
         }
     }
 
+    const lineElements = useMemo(() => (
+        Object.keys(formattedRoundData[0] ?? {}).map((teamName, i) => (
+            <Line
+                key={teamName}
+                type="monotone"
+                dataKey={teamName}
+                stroke={teamColors[i % teamColors.length]}
+                isAnimationActive={false}
+                dot={false}
+            />
+        ))
+    ), [formattedRoundData, teamColors]);
+
+    let interval;
+    if (numRounds < 10) {
+        interval = 0;
+    }
+    else if (numRounds < 50) {
+        interval = 1;
+    }
+    else if (numRounds < 100) {
+        interval = 9;
+    }
+    else {
+        interval = 99;
+    }
+
     return (
         <>
             <LineChart
@@ -65,15 +93,11 @@ function RoundGraph({ numRounds, roundData }: { numRounds: number, roundData: Re
                 responsive
                 data={formattedRoundData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis tick={{ className: "font-mono fill-gray-200" }} />
+                <XAxis tick={{ className: "font-mono fill-gray-200" }} interval={interval} />
                 <YAxis width="auto" tick={{ className: "font-mono fill-gray-200" }} />
                 <Tooltip content={RoundTooltip} />
                 <Legend />
-                {
-                    Object.keys(formattedRoundData[0]).map((teamName, teamIndex) => (
-                        <Line type="monotone" dataKey={teamName} stroke={teamColors[teamIndex % teamColors.length]} />
-                    ))
-                }
+                {lineElements}
             </LineChart >
         </>
     )

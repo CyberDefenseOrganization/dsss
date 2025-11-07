@@ -24,26 +24,19 @@ function ScoreGraph({ scoreData }: { scoreData: Record<string, number> }) {
         formattedScoredData.push({ teamName, score });
     }
 
-    console.log(formattedScoredData);
-
     return (
         <>
             <BarChart
                 className="h-full w-full"
                 responsive
+
                 data={formattedScoredData}
-                margin={{
-                    top: 5,
-                    right: 0,
-                    left: 0,
-                    bottom: 5,
-                }}
             >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="teamName" tick={{ className: "font-mono fill-gray-200" }} />
                 <YAxis width="auto" tick={{ className: "font-mono fill-gray-200" }} />
                 <Tooltip content={ScoreTooltip} />
-                <Bar dataKey="score" name="test" className="fill-indigo-400 stroke-indigo-400" />
+                <Bar dataKey="score" className="fill-indigo-400 stroke-indigo-400" />
             </BarChart>
         </>
     )

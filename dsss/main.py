@@ -1,6 +1,7 @@
 import uvicorn
 
 from dsss.checks.base import BaseCheck
+from dsss.checks.random import RandomCheck
 from dsss.config import Config
 from dsss.team import Team
 from dsss.service import Service
@@ -21,7 +22,7 @@ def make_team(name: str, service_list: list[tuple[str, int, BaseCheck]]) -> Team
 
 def get_config() -> Config:
     service_defs = [
-        ("Ping", 100, PingCheck("1.1.1.1", 5)),
+        ("Ping", 100, RandomCheck(0.5)),
     ]
 
     team_names = [f"Team{i}" for i in range(1, 12)]

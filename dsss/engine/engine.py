@@ -119,7 +119,6 @@ class Engine:
         dict[team, list[score]]
         """
         teams = self.get_rounds()
-        print(teams)
 
         cumulative_teams: dict[str, list[int]] = {}
 
@@ -133,7 +132,6 @@ class Engine:
                 if index != 0:
                     cumulative_teams[team][index] += cumulative_teams[team][index - 1]
 
-        print(cumulative_teams)
         return cumulative_teams
 
     def get_rounds(self) -> dict[str, list[int]]:
