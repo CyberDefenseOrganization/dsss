@@ -113,6 +113,29 @@ class Engine:
         """
         return self.get_scores_round(self.current_round)
 
+    def get_rounds_cumulative(self) -> dict[str, list[int]]:
+        """
+        Returns the cumulative score at each round in the following format:
+        dict[team, list[score]]
+        """
+        teams = self.get_rounds()
+        print(teams)
+
+        cumulative_teams: dict[str, list[int]] = {}
+
+        for team, rounds in teams.items():
+            if team not in cumulative_teams:
+                cumulative_teams[team] = []
+
+            for index, round in enumerate(rounds):
+                cumulative_teams[team].append(round)
+
+                if index != 0:
+                    cumulative_teams[team][index] += cumulative_teams[team][index - 1]
+
+        print(cumulative_teams)
+        return cumulative_teams
+
     def get_rounds(self) -> dict[str, list[int]]:
         """
         Returns the scores attained each round in the following format:
@@ -145,7 +168,6 @@ class Engine:
 
         return rounds_list
 
-    # tuple[team, service, success, message]
     async def _run_check(
         self, team: Team, service: Service
     ) -> tuple[str, str, bool, str | None]:

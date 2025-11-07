@@ -24,7 +24,7 @@ def get_config() -> Config:
         ("Ping", 100, PingCheck("1.1.1.1", 5)),
     ]
 
-    team_names = [f"Team{i}" for i in range(1, 100)]
+    team_names = [f"Team{i}" for i in range(1, 12)]
     teams = {name: make_team(name, service_defs) for name in team_names}
 
     config = Config(
@@ -40,7 +40,7 @@ def get_config() -> Config:
 
 
 def main():
-    uvicorn.run("dsss.api:app", host="0.0.0.0", port=8080, log_level="error")
+    uvicorn.run("dsss.api.api:app", host="0.0.0.0", port=8080, log_level="error")
 
 
 if __name__ == "__main__":
