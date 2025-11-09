@@ -26,4 +26,22 @@ export async function getRoundHistoryCumulative(): Promise<RoundHistoryResponse>
     return res.json();
 }
 
+export async function getOverview(): Promise<OverviewResponse> {
+    const res = await fetch("/api/status/get_overview");
+    return res.json();
+}
+
+interface TeamOverview {
+    score: number,
+    services: Record<string, ServiceStatus>
+}
+
+interface ServiceStatus {
+    online: boolean
+    message: string
+}
+
+export interface OverviewResponse extends StatusResponse {
+    overview: Record<string, TeamOverview>
+}
 

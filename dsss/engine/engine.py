@@ -1,7 +1,9 @@
+from dataclasses import dataclass
 import time
 import sqlite3
 import asyncio
 from asyncio import Task
+from typing import TypedDict
 
 from dsss.config import Config
 from dsss.service import Service
@@ -9,6 +11,17 @@ from dsss.team import Team
 from dsss.logger import get_logger
 
 logger = get_logger("Engine")
+
+
+@dataclass
+class ServiceStatus:
+    online: bool
+    message: str
+
+
+class TeamOverview(TypedDict):
+    score: int
+    services: dict[str, ServiceStatus]
 
 
 class Engine:
@@ -165,6 +178,24 @@ class Engine:
             ]
 
         return rounds_list
+
+    def get_overview(self) -> dict[str, TeamOverview]:
+        """
+        Returns the results of the most recent round
+        """
+        rows: list[tuple[str, str, int, str]] = self.db.execute(
+            "SELECT team, service, success, message FROM results"
+        ).fetchall()
+        scores = self.get_scores()
+        overview: dict[str, TeamOverview] = {}
+
+        for team, service, success, message in rows:
+            if team not in overview:
+                overview[team] = {"score": scores[team], "services": {}}
+
+            overview[team]["services"][service] = ServiceStatus(success > 0, message)
+
+        return overview
 
     async def _run_check(
         self, team: Team, service: Service

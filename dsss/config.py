@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Config:
-    target_round_time: int
+    target_round_time: float
     port: int
     database_path: str
     admin_username: str

@@ -38,6 +38,17 @@ async def get_cumulative_round_history(request: Request):
     }
 
 
+@router.get("/get_overview")
+async def get_overview(request: Request):
+    engine = get_engine(request)
+
+    return {
+        "overview": engine.get_overview(),
+        "currentRound": engine.current_round,
+        "timeToNextRound": engine.get_time_to_next_round(),
+    }
+
+
 @router.get("/time_to_next_round")
 async def get_time_to_next_round(request: Request):
     return {

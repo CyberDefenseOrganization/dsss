@@ -73,13 +73,16 @@ function RoundGraph({ numRounds, roundData }: { numRounds: number, roundData: Re
     ), [formattedRoundData, teamColors]);
 
     let interval;
-    if (numRounds < 10) {
+    if (numRounds < 20) {
         interval = 0;
     }
     else if (numRounds < 50) {
         interval = 1;
     }
     else if (numRounds < 100) {
+        interval = 4;
+    }
+    else if (numRounds < 200) {
         interval = 9;
     }
     else {
