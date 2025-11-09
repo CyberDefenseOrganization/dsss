@@ -22,9 +22,9 @@ def make_team(name: str, service_list: list[tuple[str, int, BaseCheck]]) -> Team
 
 def get_config() -> Config:
     service_defs = [
-        ("Ping", 100, RandomCheck(0.5)),
-        ("Ping1", 100, RandomCheck(0.5)),
-        ("Ping2", 100, RandomCheck(0.5)),
+        ("Web Content", 100, RandomCheck(0.5)),
+        ("SSH Daemon", 100, RandomCheck(0.5)),
+        ("Test Fortnite Long", 100, RandomCheck(0.5)),
         ("Ping3", 100, RandomCheck(0.5)),
         ("Ping4", 100, RandomCheck(0.5)),
         ("Ping5", 100, RandomCheck(0.5)),

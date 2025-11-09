@@ -17,15 +17,18 @@ function Home() {
                 <div className="flex flex-col items-center w-full lg:p-4 lg:w-6xl h-full pt-6 gap-8 lg:gap-14 md:px-4">
                     {
                         overviewData &&
-                        <table className="table-auto font-mono text-gray-200 border-indigo-400 border-1 w-full">
+                        <table className="table-auto font-mono text-gray-200 w-full text-lg mt-40">
                             <thead>
-                                <tr className="border-indigo-400 border-1 p-2">
-                                    <th className="border-indigo-400 border-1 p-2">Team</th>
-                                    <th className="border-indigo-400 border-1 p-2">Score</th>
+                                <tr>
+                                    <th className="py-4"></th>
                                     {
                                         services.map((service) => (
-                                            <th className="border-indigo-400 border-1">
-                                                {service}
+                                            <th className="">
+                                                <div className="-rotate-50 -translate-y-27 -translate-x-5 absolute">
+                                                    <div className="text-lg text-nowrap text-left w-64 overflow-hidden">
+                                                        {service}
+                                                    </div>
+                                                </div>
                                             </th>
                                         ))
                                     }
@@ -34,18 +37,21 @@ function Home() {
                             <tbody>
                                 {
                                     Object.keys(overviewData.overview).map((team) => (
-                                        <tr className="text-center">
-                                            <td className="border-indigo-400 border-1">{team}</td>
-                                            <td className="border-indigo-400 border-1">{overviewData.overview[team].score}</td>
+                                        <tr>
+                                            <td>
+                                                <div className="font-mono font-bold text-2xl p-4">
+                                                    {team}
+                                                </div>
+                                            </td>
                                             {
                                                 Object.values(overviewData.overview[team].services).map((service) => (
-                                                    <td className="font-mono border-indigo-400 border-1 p-2 text-4xl ">
-                                                        <div className="group w-full h-full flex">
+                                                    <td className="font-mono border-indigo-300 border-3">
+                                                        <div className="group flex justify-center align-middle p-2">
                                                             {
                                                                 service.online ?
-                                                                    <FontAwesomeIcon icon={faCircleArrowUp} className="text-green-400" />
+                                                                    <FontAwesomeIcon icon={faCircleArrowUp} className="text-green-400 text-4xl" />
                                                                     :
-                                                                    <FontAwesomeIcon icon={faCircleArrowDown} className="text-red-400" />
+                                                                    <FontAwesomeIcon icon={faCircleArrowDown} className="text-red-400 text-4xl" />
                                                             }
                                                             <div
                                                                 className="hover:hidden hidden group-hover:block bg-gray-950 absolute -translate-y-9 translate-x-12 z-10 p-1 border-indigo-400 border-1 text-lg">
