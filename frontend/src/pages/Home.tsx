@@ -3,6 +3,7 @@ import RoundGraph from "../components/RoundGraph";
 import ScoreGraph from "../components/ScoreGraph";
 import { useStatusPoller } from "../hooks/useStatusPoller";
 import { getRoundHistoryCumulative, getScores, type RoundHistoryResponse, type ScoresResponse } from "../api/status";
+import Footer from "../components/Footer";
 
 function Home() {
     const scoreData: ScoresResponse | null = useStatusPoller(getScores);
@@ -22,6 +23,7 @@ function Home() {
                     }
                 </div>
             </div >
+            <Footer data={scoreData} />
         </>
     );
 }

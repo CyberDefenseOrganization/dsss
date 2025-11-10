@@ -1,5 +1,5 @@
 import uvicorn
-
+import random
 from dsss.checks.base import BaseCheck
 from dsss.checks.random import RandomCheck
 from dsss.config import Config
@@ -25,28 +25,28 @@ def get_config() -> Config:
         ("Web Content", 100, RandomCheck(0.5)),
         ("SSH Daemon", 100, RandomCheck(0.5)),
         ("Test Fortnite Long", 100, RandomCheck(0.5)),
-        ("Ping3", 100, RandomCheck(0.5)),
-        ("Ping4", 100, RandomCheck(0.5)),
-        ("Ping5", 100, RandomCheck(0.5)),
-        ("Ping6", 100, RandomCheck(0.5)),
-        ("Ping7", 100, RandomCheck(0.5)),
-        ("Ping8", 100, RandomCheck(0.5)),
-        ("Ping9", 100, RandomCheck(0.5)),
-        ("Ping10", 100, RandomCheck(0.5)),
-        ("Ping11", 100, RandomCheck(0.5)),
-        ("Ping12", 100, RandomCheck(0.5)),
-        ("Ping13", 100, RandomCheck(0.5)),
-        ("Ping14", 100, RandomCheck(0.5)),
-        ("Ping15", 100, RandomCheck(0.5)),
-        ("Ping16", 101, RandomCheck(0.5)),
-        ("Ping17", 100, RandomCheck(0.5)),
-        ("Ping18", 100, RandomCheck(0.5)),
-        ("Ping19", 100, RandomCheck(0.5)),
-        ("Ping20", 100, RandomCheck(0.5)),
-        ("Ping21", 100, RandomCheck(0.5)),
-        ("Ping21", 100, RandomCheck(0.5)),
-        ("Ping22", 100, RandomCheck(0.5)),
-        ("Ping23", 100, RandomCheck(0.5)),
+        ("Ping3", 100, RandomCheck(random.random())),
+        ("Ping4", 100, RandomCheck(random.random())),
+        ("Ping5", 100, RandomCheck(random.random())),
+        ("Ping6", 100, RandomCheck(random.random())),
+        ("Ping7", 100, RandomCheck(random.random())),
+        ("Ping8", 100, RandomCheck(random.random())),
+        ("Ping9", 100, RandomCheck(random.random())),
+        ("Ping10", 100, RandomCheck(random.random())),
+        ("Ping11", 100, RandomCheck(random.random())),
+        ("Ping12", 100, RandomCheck(random.random())),
+        ("Ping13", 100, RandomCheck(random.random())),
+        ("Ping14", 100, RandomCheck(random.random())),
+        ("Ping15", 100, RandomCheck(random.random())),
+        ("Ping16", 101, RandomCheck(random.random())),
+        ("Ping17", 100, RandomCheck(random.random())),
+        ("Ping18", 100, RandomCheck(random.random())),
+        ("Ping19", 100, RandomCheck(random.random())),
+        ("Ping20", 100, RandomCheck(random.random())),
+        ("Ping21", 100, RandomCheck(random.random())),
+        ("Ping21", 100, RandomCheck(random.random())),
+        ("Ping22", 100, RandomCheck(random.random())),
+        ("Ping23", 100, RandomCheck(random.random())),
     ]
 
     team_names = [f"Team{i}" for i in range(1, 12)]
@@ -54,7 +54,7 @@ def get_config() -> Config:
 
     config = Config(
         port=8080,
-        target_round_time=10,
+        target_round_time=180,
         teams=teams,
         admin_username="admin",
         admin_password="bb123#123",
