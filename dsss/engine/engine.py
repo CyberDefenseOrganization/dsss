@@ -207,8 +207,12 @@ class Engine:
             )
             return (team.name, service.name, success, msg)
         except asyncio.TimeoutError:
-            return (team.name, service.name, False, "Timeout")
+            return (team.name, service.name, False, "Timeout occurred")
+
         except Exception as e:
+            logger.warning(
+                f"Unhandled exception while performing check '{service.name}': {repr(e)}"
+            )
             return (team.name, service.name, False, f"Error: {e}")
 
     def _store_results(

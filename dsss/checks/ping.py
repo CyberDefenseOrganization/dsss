@@ -6,7 +6,7 @@ from dsss.checks.base import BaseCheck
 
 
 class PingCheck(BaseCheck):
-    def __init__(self, host: str, timeout_seconds: int) -> None:
+    def __init__(self, host: str, timeout_seconds: float) -> None:
         super().__init__(host, None, timeout_seconds=timeout_seconds)
 
     @override
@@ -15,7 +15,7 @@ class PingCheck(BaseCheck):
             delay_ms: int = (
                 await aioping.ping(
                     self.host,
-                    timeout=self.timeout_seconds,
+                    timeout=int(self.timeout_seconds),
                     family=socket.AddressFamily.AF_INET,
                 )
                 * 1000

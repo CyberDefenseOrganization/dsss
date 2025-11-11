@@ -4,3 +4,7 @@ from dsss.engine.engine import Engine
 
 def get_engine(request: Request) -> Engine:
     return request.app.state.engine  # pyright: ignore[reportAny]
+
+
+def get_sessions(request: Request) -> list[str]:
+    return request.app.state.sessions  # pyright: ignore[reportAny]

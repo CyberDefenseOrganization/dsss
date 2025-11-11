@@ -89,6 +89,8 @@ function RoundGraph({ numRounds, roundData }: { numRounds: number, roundData: Re
         interval = 99;
     }
 
+    console.log(formattedRoundData);
+
     return (
         <>
             <LineChart

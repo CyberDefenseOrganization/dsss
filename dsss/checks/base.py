@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 class BaseCheck(ABC):
     host: str
     port: int | None
-    timeout_seconds: int = 10
+    timeout_seconds: float = 10
 
-    def __init__(self, host: str, port: int | None, timeout_seconds: int) -> None:
+    def __init__(self, host: str, port: int | None, timeout_seconds: float) -> None:
         self.host = host
         self.port = port
         self.timeout_seconds = timeout_seconds

@@ -2,7 +2,6 @@ import asyncio
 
 from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI
-from fastapi.requests import Request
 
 from dsss.main import get_config
 from dsss.engine.engine import Engine
@@ -15,6 +14,7 @@ async def lifespan(app: FastAPI):
     config = get_config()
     app.state.engine = Engine(config)
     app.state.engine_task = asyncio.create_task(app.state.engine.start())
+    app.state.sessions = []
     yield
 
 

@@ -1,5 +1,5 @@
-from typing import override
 import random
+from typing import override
 
 from dsss.checks.base import BaseCheck
 
