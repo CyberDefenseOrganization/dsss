@@ -41,6 +41,7 @@ class Engine:
         self.last_round_finished = time.time()
 
         self.db = sqlite3.connect(self.config.database_path)
+
         _ = self.db.execute("""
             CREATE TABLE IF NOT EXISTS results (
                 round INTEGER,
@@ -65,9 +66,12 @@ class Engine:
             )
 
         while True:
+            if self.paused:
+                await asyncio.sleep(1)
+                continue
+
             time_before = time.time()
-            if not self.paused:
-                await self.run_round()
+            await self.run_round()
 
             time_taken = time.time() - time_before
             logger.info(
