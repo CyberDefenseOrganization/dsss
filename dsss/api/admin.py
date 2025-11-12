@@ -9,11 +9,6 @@ from dsss.api import get_engine, get_sessions
 router = APIRouter()
 
 
-class Login(BaseModel):
-    username: str
-    password: str
-
-
 async def authentication(request: Request) -> str:
     sessions = get_sessions(request)
     session = request.cookies.get("session_token")
@@ -32,8 +27,13 @@ async def authentication(request: Request) -> str:
     return session
 
 
+class Login(BaseModel):
+    username: str
+    password: str
+
+
 @router.post("/login")
-async def login(request: Request, login: Login, response: Response):
+async def login(request: Request, response: Response, login: Login):
     engine = get_engine(request)
     sessions = get_sessions(request)
 
@@ -60,8 +60,8 @@ async def login(request: Request, login: Login, response: Response):
         {
             "success": False,
             "message": "invalid credentials",
-            "status_code": 401,
-        }
+        },
+        status_code=401,
     )
 
 
