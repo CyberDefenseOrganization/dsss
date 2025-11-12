@@ -5,7 +5,7 @@
 </div>
 
 # DSSS
-**Damiens' Simple Scoring Suite**
+**Damiens' Simple Scoring Suite**\\
 *A minimalist scoring engine for Red-Blue cyber competitions.*
 
 [About](#about) •
