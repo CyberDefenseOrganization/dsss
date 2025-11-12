@@ -6,6 +6,7 @@ import './index.css'
 import Home from './pages/Home.tsx';
 import Overview from './pages/Overview.tsx';
 import NotFound from './pages/NotFound.tsx';
+import Admin from './pages/Admin.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route index element={<Home />} />
         <Route path="/overview" element={<Overview />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
