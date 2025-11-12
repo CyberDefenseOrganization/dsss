@@ -21,15 +21,6 @@
 ## About
 **DSSS** is a bare-bones scoring engine for Red-Blue cyber competitions, [with a focus on simplicity, clarity, and frugality](https://suckless.org/). It intends to be as minimal and focused as possible, while being easy to configure and deploy.
 
-
-## Components
-
-```
-dsss/
-├── dsss/       # python backend
-└── frontend/   # react frontend
-```
-
 ## Deploying
 
 ### Dependencies 
