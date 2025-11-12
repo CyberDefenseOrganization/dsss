@@ -1,12 +1,11 @@
 <div align="center">
   
 <div>
-  <img height=200 src="athena/assets/cdo-logo.png" alt="Pantheon logo" />
+  <img height=200 src="logo.png" alt="DSSS Logo" />
 </div>
 
 # DSSS
 **Damiens' Simple Scoring Suite**\
-*for here lies the temple of the gods*
 
 
 [About](#about) •
@@ -15,24 +14,21 @@
 [Supported Platforms](#supported-platforms) •
 [Demo](#demo)
 
-[![Build All](https://github.com/coal-rock/Pantheon/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Machina-Software/Pantheon/actions/workflows/build_all.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 </div>
 
 ## About
-**Pantheon** is a C2 Adversary Emulation Framework written entirely in Rust. It strives to be *painlessly interactive*, *performant*, and *portable*.
+**DSSS** is a a bare-bones scoring engine for Red-Blue cyber competitions, [with a focus on simplicity, clarity, and frugality].(https://suckless.org/).
 
 
 ## Components
 
 ```
-Pantheon/
-├── athena/     # web-based frontend built using Dioxus
-├── hermes/     # cross-platform agent
-├── talaria/    # library implementing shared functionality between other components
-└── tartarus/   # backend server built using Rocket
+DSSS/
+├── dsss/       # python backend
+└── frontend/   # react frontend
 ```
 
 ## Getting Started
