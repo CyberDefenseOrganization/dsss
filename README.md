@@ -6,13 +6,12 @@
 
 # DSSS
 **Damiens' Simple Scoring Suite**
-
+*A minimalist scoring engine for Red-Blue cyber competitions.*
 
 [About](#about) •
 [Deploying](#deploying) •
 [Creating Checks](#creating-checks) •
-[Supported Platforms](#supported-platforms) •
-[Demo](#demo)
+[Screenshots](#screenshots)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -40,15 +39,15 @@ sudo apt-get update
 sudo apt-get install nodejs npm pdm
 ```
 
-### Backend
+#### Backend
 ```bash
-gt clone https://github.com/CyberDefenseOrganization/dsss
+git clone https://github.com/CyberDefenseOrganization/dsss
 cd dsss
 pdm install
 pdm run start
 ```
 
-### Frontend
+#### Frontend
 ```bash
 gt clone https://github.com/CyberDefenseOrganization/dsss
 cd dsss/
@@ -62,15 +61,15 @@ All checks in DSSS are simply subclasses of the `BaseCheck` class, implementing 
 Below is an example of what the **Random** check looks like.
 ```python
 class RandomCheck(BaseCheck):
-  liklihood: float
+  likelihood: float
 
-  def __init__(self, liklihood: float = 0.5) -> None:
-    self.liklihood = liklihood
+  def __init__(self, likelihood: float = 0.5) -> None:
+    self.likelihood = likelihood
     super().__init__("0.0.0.0", None, 10)
 
   @override
   async def check(self) -> tuple[bool, str | None]:
-    if random.random() > 1 - self.liklihood:
+    if random.random() > 1 - self.likelihood:
       return (True, "lucky")
     else:
       return (False, "unlucky")

@@ -5,15 +5,15 @@ from dsss.checks.base import BaseCheck
 
 
 class RandomCheck(BaseCheck):
-    liklihood: float
+    likelihood: float
 
-    def __init__(self, liklihood: float = 0.5) -> None:
-        self.liklihood = liklihood
+    def __init__(self, likelihood: float = 0.5) -> None:
+        self.likelihood = likelihood
         super().__init__("0.0.0.0", None, 10)
 
     @override
     async def check(self) -> tuple[bool, str | None]:
-        if random.random() > self.liklihood:
+        if random.random() > 1 - self.likelihood:
             return (True, "lucky")
         else:
             return (False, "unlucky")
