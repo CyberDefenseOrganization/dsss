@@ -23,6 +23,14 @@
 
 ## Deploying
 
+### Supported Deployment Method
+To deploy DSSS, a docker compose deployment is the recommended method of deployment currently, this will handle the complete install process so that the user only needs to configure the scoring checks and competition within the configuration and the deployment will handle the rest. To deploy follow these steps as root/sudo on the system!
+```bash
+git clone https://github.com/CyberDefenseOrganization/dsss
+cd dsss/docker
+docker compose up -d
+```
+
 ### Dependencies 
 To deploy DSSS, it is required that both NodeJS and Python are installed and available in your system path, alongside both [npm](https://www.npmjs.com/) and [PDM](https://pdm-project.org/). This can be accomplished through the following on Debian/Ubuntu:
 ```bash
