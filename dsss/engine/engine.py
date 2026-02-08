@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import time
 import sqlite3
 import asyncio
@@ -13,8 +12,7 @@ from dsss.logger import get_logger
 logger = get_logger("Engine")
 
 
-@dataclass
-class ServiceStatus:
+class ServiceStatus(TypedDict):
     online: bool
     message: str
 
@@ -30,15 +28,19 @@ class Engine:
 
     paused: bool
     current_round: int
+    round_times: list[float]
 
     # epoch time when last round finished
     last_round_finished: float
+    task_semaphore: asyncio.Semaphore
 
     def __init__(self, config: Config) -> None:
         self.config = config
         self.paused = False
         self.current_round = 0
         self.last_round_finished = time.time()
+        self.round_times = []
+        self.task_semaphore = asyncio.Semaphore(config.max_concurrent_checks)
 
         self.db = sqlite3.connect(self.config.database_path)
 
@@ -74,6 +76,8 @@ class Engine:
             await self.run_round()
 
             time_taken = time.time() - time_before
+            self.round_times.append(time_taken)
+
             logger.info(
                 f"Round {self.current_round} completed in {time_taken:01.5f} seconds"
             )
@@ -197,27 +201,42 @@ class Engine:
             if team not in overview:
                 overview[team] = {"score": scores[team], "services": {}}
 
-            overview[team]["services"][service] = ServiceStatus(success > 0, message)
+            overview[team]["services"][service] = ServiceStatus(
+                online=success > 0, message=message
+            )
 
         return overview
+
+    def get_average_round_time(self) -> float:
+        """
+        Returns the average round time in seconds
+        """
+        return sum(self.round_times) / len(self.round_times)
+
+    def get_last_round_time(self) -> float:
+        """
+        Returns last round time in seconds
+        """
+        return self.round_times[-1]
 
     async def _run_check(
         self, team: Team, service: Service
     ) -> tuple[str, str, bool, str | None]:
-        try:
-            success, msg = await asyncio.wait_for(
-                service.check.check(),
-                timeout=service.check.timeout_seconds,
-            )
-            return (team.name, service.name, success, msg)
-        except asyncio.TimeoutError:
-            return (team.name, service.name, False, "Timeout occurred")
+        async with self.task_semaphore:
+            try:
+                success, msg = await asyncio.wait_for(
+                    service.check.check(),
+                    timeout=service.check.timeout_seconds,
+                )
+                return (team.name, service.name, success, msg)
+            except asyncio.TimeoutError:
+                return (team.name, service.name, False, "Timeout occurred")
 
-        except Exception as e:
-            logger.warning(
-                f"Unhandled exception while performing check '{service.name}': {repr(e)}"
-            )
-            return (team.name, service.name, False, f"Error: {e}")
+            except Exception as e:
+                logger.warning(
+                    f"Unhandled exception while performing check '{service.name}': {repr(e)}"
+                )
+                return (team.name, service.name, False, f"Error: {e}")
 
     def _store_results(
         self, round_id: int, results: list[tuple[str, str, bool, str | None]]

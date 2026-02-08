@@ -10,7 +10,7 @@ class SSHCheck(BaseCheck):
     username: str
     password: str
 
-    command: str
+    command: str | None
     expected_output: str
 
     def __init__(
@@ -20,7 +20,7 @@ class SSHCheck(BaseCheck):
         password: str,
         port: int = 22,
         timeout_seconds: float = 10,
-        command: str = "echo scoring",
+        command: str | None = "echo scoring",
         expected_output: str = "scoring",
     ) -> None:
         super().__init__(host, port, timeout_seconds)
@@ -39,7 +39,11 @@ class SSHCheck(BaseCheck):
                 password=self.password,
                 known_hosts=None,
             ) as conn:
+                if self.command is None:
+                    return (True, "SSH appears to be up.")
+
                 result = await conn.run(self.command, check=False)
+                await conn.run("exit")
 
                 stdout = str(result.stdout).strip()
                 expected_output = self.expected_output.strip()

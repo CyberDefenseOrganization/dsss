@@ -13,11 +13,11 @@ function Overview({ overviewData }: { overviewData: OverviewResponse }) {
             <table className="table-auto font-mono text-gray-200 w-full text-lg mt-26 border-collapse">
                 <thead>
                     <tr>
-                        <th className="py-4"></th>
+                        <th className="py-12"></th>
                         {
                             services.map((service) => (
                                 <th className="">
-                                    <div className="-rotate-50 -translate-y-27 -translate-x-5 fixed">
+                                    <div className="-rotate-50 -translate-y-20 -translate-x-5 fixed">
                                         <div className="text-lg text-nowrap text-left w-64 overflow-hidden">
                                             {service}
                                         </div>

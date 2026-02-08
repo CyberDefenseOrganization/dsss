@@ -1,9 +1,6 @@
-export interface StatusResponse {
-    currentRound: number,
-    timeToNextRound: number,
-}
+import type { PolledAPIResponse } from "./api";
 
-export interface ScoresResponse extends StatusResponse {
+export interface ScoresResponse extends PolledAPIResponse {
     scores: Record<string, number>,
 };
 
@@ -12,7 +9,7 @@ export async function getScores(): Promise<ScoresResponse> {
     return res.json();
 }
 
-export interface RoundHistoryResponse extends StatusResponse {
+export interface RoundHistoryResponse extends PolledAPIResponse {
     rounds: Record<string, Array<number>>
 }
 
@@ -41,7 +38,7 @@ interface ServiceStatus {
     message: string
 }
 
-export interface OverviewResponse extends StatusResponse {
+export interface OverviewResponse extends PolledAPIResponse {
     overview: Record<string, TeamOverview>
 }
 

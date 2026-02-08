@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import type { StatusResponse } from "../api/status";
+import type { PolledAPIResponse } from "../api/api";
 
-function Footer({ data }: { data: StatusResponse | null }) {
+function Footer({ data }: { data: PolledAPIResponse | null }) {
     if (!data) {
         return (<></>);
     }

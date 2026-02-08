@@ -2,21 +2,10 @@ from typing import Any
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from dsss.api import get_engine
+from dsss.api.shared import get_engine, make_response
 from dsss.engine.engine import Engine
 
 router = APIRouter()
-
-
-def make_response(engine: Engine, **kwargs: dict[str, Any]) -> JSONResponse:  # pyright: ignore[reportExplicitAny]
-    return JSONResponse(
-        {
-            "currentRound": engine.current_round,
-            "timeToNextRound": engine.get_time_to_next_round(),
-            "paused": engine.paused,
-            **kwargs,
-        }
-    )
 
 
 @router.get("/get_scores")
