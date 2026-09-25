@@ -25,7 +25,7 @@ async def get_scores(request: Request):
     return make_response(
         engine,
         **{
-            "scores": engine.get_scores(),
+            "scores": engine.current_scores,
         },
     )
 
@@ -37,7 +37,7 @@ async def get_round_history(request: Request):
     return make_response(
         engine,
         **{
-            "rounds": engine.get_rounds(),
+            "rounds": engine.current_round_history,
         },
     )
 
@@ -49,7 +49,7 @@ async def get_cumulative_round_history(request: Request):
     return make_response(
         engine,
         **{
-            "rounds": engine.get_rounds_cumulative(),
+            "rounds": engine.current_score_history,
         },
     )
 
@@ -61,6 +61,6 @@ async def get_overview(request: Request):
     return make_response(
         engine,
         **{
-            "overview": engine.get_overview(),
+            "overview": engine.current_overview,
         },
     )

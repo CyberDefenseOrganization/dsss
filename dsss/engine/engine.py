@@ -35,6 +35,14 @@ class Engine:
     last_round_finished: float
     workers: WorkerPool
 
+    # cached values to avoid querying the entire DB on every request
+    # values are updated at the end of each round
+    current_scores: dict[str, int]
+    current_overview: dict[str, TeamOverview] # total score at a each given round
+    current_score_history: dict[str, list[int]] # score gained each round
+    current_round_history: dict[str, list[int]]
+    
+
     def __init__(self, config: Config) -> None:
         self.config = config
         self.paused = False
@@ -44,6 +52,7 @@ class Engine:
         self.workers = WorkerPool(config.num_worker_processes)
 
         self.db = sqlite3.connect(self.config.database_path)
+        self.update_caches()
 
         _ = self.db.execute("""
             CREATE TABLE IF NOT EXISTS results (
@@ -89,6 +98,11 @@ class Engine:
                 logger.warning(
                     f"Round checks took longer than specified target round time of {self.config.target_round_time} seconds by {abs(time_to_sleep):01.2f} seconds"
                 )
+          
+            before_update_cache = time.time()
+            self.update_caches()
+            cache_time_taken = time.time() - before_update_cache
+            logger.info(f"Updating caches took {cache_time_taken:0.15f} seconds")
 
             self.last_round_finished = time.time()
             await asyncio.sleep(max(0, time_to_sleep))
@@ -103,6 +117,17 @@ class Engine:
 
         results = await asyncio.gather(*tasks)
         self._store_results(self.current_round, results)
+
+    def update_caches(self):
+        """
+        Populates all of the cached values commonly queried by the API.
+        Should be called at the end of each round.
+        """
+        self.current_scores = self.query_scores()
+        self.current_overview = self.query_overview()
+        self.current_score_history = self.query_rounds_cumulativee()
+        self.current_round_history = self.query_rounds()
+
 
     def get_time_to_next_round(self) -> float:
         return max(
@@ -129,18 +154,18 @@ class Engine:
 
         return scores
 
-    def get_scores(self) -> dict[str, int]:
+    def query_scores(self) -> dict[str, int]:
         """
         Returns current scores
         """
         return self.get_scores_round(self.current_round)
 
-    def get_rounds_cumulative(self) -> dict[str, list[int]]:
+    def query_rounds_cumulativee(self) -> dict[str, list[int]]:
         """
         Returns the cumulative score at each round in the following format:
         dict[team, list[score]]
         """
-        teams = self.get_rounds()
+        teams = self.query_rounds()
 
         cumulative_teams: dict[str, list[int]] = {}
 
@@ -156,7 +181,7 @@ class Engine:
 
         return cumulative_teams
 
-    def get_rounds(self) -> dict[str, list[int]]:
+    def query_rounds(self) -> dict[str, list[int]]:
         """
         Returns the scores attained each round in the following format:
         dict[team, list[score]]
@@ -188,14 +213,14 @@ class Engine:
 
         return rounds_list
 
-    def get_overview(self) -> dict[str, TeamOverview]:
+    def query_overview(self) -> dict[str, TeamOverview]:
         """
         Returns the results of the most recent round
         """
         rows: list[tuple[str, str, int, str]] = self.db.execute(
             "SELECT team, service, success, message FROM results"
         ).fetchall()
-        scores = self.get_scores()
+        scores = self.query_scores()
         overview: dict[str, TeamOverview] = {}
 
         for team, service, success, message in rows:
