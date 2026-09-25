@@ -90,15 +90,17 @@ async def logout(request: Request, response: Response):
     sessions = get_sessions(request)
     session_token = request.cookies.get("session_token")
 
-    if session_token is not None:
+    session_found = False
+    if session_token is not None and session_token in sessions:
         sessions.remove(session_token)
+        session_found = True
 
     response.delete_cookie("session_token")
     response.delete_cookie("session_token_timestamp")
 
     return {
         "success": True,
-        "message": "session not found" if session_token is not None else None,
+        "message": None if session_found else "session not found",
     }
 
 

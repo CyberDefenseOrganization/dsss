@@ -24,22 +24,21 @@ class TCPCheck(AsyncCheck):
     @override
     async def check(self) -> tuple[bool, str | None]:
         reader, writer = await asyncio.open_connection(self.host, self.port)
+        try:
+            if self.messages is None:
+                return (True, "Service is online")
 
-        if self.messages is None:
-            return (True, "Service is online")
+            for message in self.messages:
+                writer.write(message.encode())
+                await writer.drain()
 
-        for message in self.messages:
-            writer.write(message.encode())
-            await writer.drain()
-
-        data = await reader.read(100)
-        print(f"Received: {data.decode()!r}")
-
-        print("Close the connection")
-        writer.close()
-        await writer.wait_closed()
-
-        if self.expected_response or "" in data.decode():
-            return (True, "Expected response found")
-        else:
+            data = await reader.read(100)
+            if (
+                self.expected_response is None
+                or self.expected_response in data.decode()
+            ):
+                return (True, "Expected response found")
             return (False, "Unexpected server response")
+        finally:
+            writer.close()
+            await writer.wait_closed()

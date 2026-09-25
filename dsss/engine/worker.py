@@ -179,7 +179,7 @@ class WorkerPool:
             async with asyncio.timeout(timeout):
                 return await worker.check(team, service)
 
-        except asyncio.CancelledError:
+        except (Exception, asyncio.CancelledError):
             await worker.close()
             raise
 
