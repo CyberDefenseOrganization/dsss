@@ -5,7 +5,7 @@ from dsss.api.shared import get_engine, make_response
 router = APIRouter()
 
 
-@router.get("/get_scores")
+@router.get("/scores")
 async def get_scores(request: Request):
     engine = get_engine(request)
 
@@ -17,7 +17,7 @@ async def get_scores(request: Request):
     )
 
 
-@router.get("/get_round_history")
+@router.get("/round_history")
 async def get_round_history(request: Request):
     engine = get_engine(request)
 
@@ -29,7 +29,7 @@ async def get_round_history(request: Request):
     )
 
 
-@router.get("/get_cumulative_round_history")
+@router.get("/cumulative_round_history")
 async def get_cumulative_round_history(request: Request):
     engine = get_engine(request)
 
@@ -41,7 +41,7 @@ async def get_cumulative_round_history(request: Request):
     )
 
 
-@router.get("/get_overview")
+@router.get("/overview")
 async def get_overview(request: Request):
     engine = get_engine(request)
 

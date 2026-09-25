@@ -73,7 +73,7 @@ async def login(request: Request, response: Response, login: Login):
     )
 
 
-@router.get("/get_status")
+@router.get("/status")
 async def get_status(request: Request, session: str = Depends(authentication)):
     engine = get_engine(request)
 
