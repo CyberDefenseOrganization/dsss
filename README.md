@@ -55,11 +55,11 @@ npm run dev
 ```
 
 ## Creating Checks
-All checks in DSSS are simply subclasses of the `BaseCheck` class, implementing the constructor as well as an asynchronous `check` method.
+Checks are simply classes that inherit from either the `AsyncCheck`, or `SyncCheck` base classes, and implement a `check()` method that returns: `(success: bool, message: str)`.
 
 Below is an example of what the **Random** check looks like.
 ```python
-class RandomCheck(BaseCheck):
+class RandomCheck(AsyncCheck):
   likelihood: float
 
   def __init__(self, likelihood: float = 0.5) -> None:
@@ -73,9 +73,9 @@ class RandomCheck(BaseCheck):
     else:
       return (False, "unlucky")
 ```
-To extend DSSS with your own custom checks, simply create a file in `./dsss/checks/` containing a class that inherits from `BaseCheck`. Worth noting is that all checks are ran concurrently, so try to avoid blocking if possible.
+
+To extend DSSS with your own custom checks, simply add a file to the `./dsss/checks/` directory. Checks can be synchronous or asynchronous, and are executed in their own process, so blocking code can be ran without any issues.
 
 ## Screenshots
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/726908e5-5600-4361-9de8-874728fee03e" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3076084c-a1bb-4597-84bb-fd183df9d2d0" />
-

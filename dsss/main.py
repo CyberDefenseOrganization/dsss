@@ -1,11 +1,11 @@
-from click import command
-import uvicorn
+import argparse
+import asyncio
+
+from collections.abc import Sequence
 from dsss.checks.base import BaseCheck
 from dsss.checks.ftp import FTPCheck
 from dsss.checks.http import HTTPCheck
 from dsss.checks.ldap import LDAPCheck
-from dsss.checks.random import RandomCheck
-from dsss.checks.smb import SMBCheck
 from dsss.checks.ssh import SSHCheck
 from dsss.checks.tcp import TCPCheck
 from dsss.config import Config
@@ -14,7 +14,7 @@ from dsss.service import Service
 from dsss.checks.ping import PingCheck
 
 
-def make_team(name: str, service_list: list[tuple[str, int, BaseCheck]]) -> Team:
+def make_team(name: str, service_list: Sequence[tuple[str, int, BaseCheck]]) -> Team:
     services: dict[str, Service] = {}
 
     for service_name, points, check in service_list:
@@ -32,8 +32,6 @@ def get_config() -> Config:
 
     SCORING_USER = "scoring"
     SCORING_PASSWORD = "scoring"
-    LDAP_USER = "analyst5"
-    LDAP_PASSWORD = "bb123#123"
     TIMEOUT = 20
 
     for index, team_name in enumerate(team_names):
@@ -270,14 +268,35 @@ def get_config() -> Config:
         admin_username="admin",
         admin_password="bb123#123",
         database_path="rounds.db",
-        max_concurrent_checks=1000,
+        num_worker_processes=32,
     )
 
     return config
 
 
 def main():
-    uvicorn.run("dsss.api.api:app", host="0.0.0.0", port=8080, log_level="error")
+    # TODO: make this CLI a bit nicer
+    parser = argparse.ArgumentParser(description="Damiens' Simple Scoring Suite")
+    parser.add_argument(
+        "mode", choices=("server", "check"), nargs="?", default="server"
+    )
+    parser.add_argument(
+        "--fd", type=int, help="Private IPC socket supplied by the server"
+    )
+    args = parser.parse_args()
+
+    if args.mode == "check":
+        if args.fd is None:
+            parser.error("check mode requires --fd")
+        from dsss.engine.worker import run_worker
+
+        asyncio.run(run_worker(get_config(), args.fd))
+    else:
+        if args.fd is not None:
+            parser.error("--fd is only used in check mode")
+        import uvicorn
+
+        uvicorn.run("dsss.api.api:app", host="0.0.0.0", port=8080, log_level="error")
 
 
 if __name__ == "__main__":

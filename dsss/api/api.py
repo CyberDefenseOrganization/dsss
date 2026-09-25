@@ -1,6 +1,6 @@
 import asyncio
 
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from fastapi import APIRouter, FastAPI
 
 from dsss.main import get_config
@@ -13,9 +13,18 @@ import dsss.api.admin
 async def lifespan(app: FastAPI):
     config = get_config()
     app.state.engine = Engine(config)
-    app.state.engine_task = asyncio.create_task(app.state.engine.start())
-    app.state.sessions = []
-    yield
+    try:
+        async with app.state.engine.workers:
+            app.state.engine_task = asyncio.create_task(app.state.engine.start())
+            app.state.sessions = []
+            try:
+                yield
+            finally:
+                app.state.engine_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await app.state.engine_task
+    finally:
+        app.state.engine.db.close()
 
 
 app = FastAPI(lifespan=lifespan)

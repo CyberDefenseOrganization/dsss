@@ -11,10 +11,12 @@ class BaseCheck(ABC):
         self.port = port
         self.timeout_seconds = timeout_seconds
 
+
 class AsyncCheck(BaseCheck, ABC):
     @abstractmethod
     async def check(self) -> tuple[bool, str | None]:
         pass
+
 
 class SyncCheck(BaseCheck, ABC):
     @abstractmethod

@@ -5,7 +5,7 @@ from asyncio import Task
 from typing import TypedDict
 
 from dsss.config import Config
-from dsss.checks.base import AsyncCheck, SyncCheck
+from dsss.engine.worker import WorkerPool
 from dsss.service import Service
 from dsss.team import Team
 from dsss.logger import get_logger
@@ -33,7 +33,7 @@ class Engine:
 
     # epoch time when last round finished
     last_round_finished: float
-    task_semaphore: asyncio.Semaphore
+    workers: WorkerPool
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -41,7 +41,7 @@ class Engine:
         self.current_round = 0
         self.last_round_finished = time.time()
         self.round_times = []
-        self.task_semaphore = asyncio.Semaphore(config.max_concurrent_checks)
+        self.workers = WorkerPool(config.num_worker_processes)
 
         self.db = sqlite3.connect(self.config.database_path)
 
@@ -223,28 +223,19 @@ class Engine:
     async def _run_check(
         self, team: Team, service: Service
     ) -> tuple[str, str, bool, str | None]:
-        async with self.task_semaphore:
-            try:
-                if isinstance(service.check, AsyncCheck):
-                    check_result = service.check.check()
-                elif isinstance(service.check, SyncCheck):
-                    check_result = asyncio.to_thread(service.check.check)
-                else:
-                    raise TypeError(f"Unsupported check type: {type(service.check).__name__}")
+        try:
+            success, msg = await self.workers.check(
+                team.name, service.name, service.check.timeout_seconds
+            )
+            return (team.name, service.name, success, msg)
+        except TimeoutError:
+            return (team.name, service.name, False, "Timeout occurred")
 
-                success, msg = await asyncio.wait_for(
-                    check_result,
-                    timeout=service.check.timeout_seconds,
-                )
-                return (team.name, service.name, success, msg)
-            except asyncio.TimeoutError:
-                return (team.name, service.name, False, "Timeout occurred")
-
-            except Exception as e:
-                logger.warning(
-                    f"Unhandled exception while performing check '{service.name}': {repr(e)}"
-                )
-                return (team.name, service.name, False, f"Error: {e}")
+        except Exception as e:
+            logger.warning(
+                f"Unhandled exception while performing check '{service.name}': {repr(e)}"
+            )
+            return (team.name, service.name, False, f"Error: {e}")
 
     def _store_results(
         self, round_id: int, results: list[tuple[str, str, bool, str | None]]
