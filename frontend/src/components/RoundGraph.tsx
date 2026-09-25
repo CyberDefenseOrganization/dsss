@@ -5,7 +5,7 @@ const RoundTooltip = ({ active, payload, label }: TooltipContentProps<string | n
     const isVisible = active && payload && payload.length;
 
     return (
-        <div className="bg-gray-950 border-indigo-400 border-solid border-1" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+        <div className="bg-black border-[#E0E0E0] border-solid border-1" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
             {isVisible && (
                 <>
                     <div className="p-2 font-mono">

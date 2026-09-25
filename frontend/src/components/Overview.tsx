@@ -46,7 +46,7 @@ function Overview({ overviewData }: { overviewData: OverviewResponse }) {
                                                         className={`text-4xl ${service.online ? "text-green-400" : "text-red-400"}`} />
                                                 }
                                                 <div
-                                                    className="hidden -translate-y-10 group-hover:block bg-gray-950 absolute z-10 p-1 border-indigo-400 border-1 text-lg whitespace-pre bootom-0">
+                                                    className="hidden -translate-y-10 group-hover:block bg-black absolute z-10 p-1 border-[#E0E0E0] border-1 text-lg whitespace-pre bootom-0">
                                                     {service.message}
                                                 </div>
                                             </div>

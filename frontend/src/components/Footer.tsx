@@ -21,7 +21,7 @@ function Footer({ data }: { data: PolledAPIResponse | null }) {
     }, [originalTimeLeft, timeLeft]);
 
     return (
-        <div className="text-xl font-mono font-bold flex justify-between pt-4 bg-gray-950 border-indigo-400 border-t-1 p-2">
+        <div className="text-xl font-mono font-bold flex justify-between pt-4 bg-black border-[#E0E0E0] border-t-1 p-2">
             <div>{`Current round: ${data.currentRound}`}</div >
             <div>{`Time to next round: ${timeLeft > 0 ? timeLeft.toFixed(0) : 0} seconds`}</div>
         </div>

@@ -18,7 +18,7 @@ function Login({ setLoggedIn: setLoggedIn }: { setLoggedIn: (value: boolean) => 
     return (
         <>
             <div className="flex flex-col gap-4 font-mono">
-                <form action={tryLogin} className="bg-gray-950 border-1 border-indigo-400 p-6 flex flex-col items-center gap-4">
+                <form action={tryLogin} className="bg-black border-1 border-[#E0E0E0] p-6 flex flex-col items-center gap-4">
                     <div className="flex flex-col text-2xl gap-2 w-full">
                         <label htmlFor="username">Username</label>
                         <input className="p-2 bg-gray-600 " type="text" id="username" name="username"></input>
@@ -30,7 +30,7 @@ function Login({ setLoggedIn: setLoggedIn }: { setLoggedIn: (value: boolean) => 
                     </div>
 
                     <div className="w-full pt-4">
-                        <button className="text-xl h-12 bg-indigo-400 hover:bg-indigo-500 w-full px-2">
+                        <button className="text-xl h-12 bg-[#E0E0E0] hover:bg-indigo-500 w-full px-2">
                             {"Login"}
                         </button>
                     </div>

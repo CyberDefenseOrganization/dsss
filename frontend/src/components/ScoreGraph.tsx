@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, type TooltipConten
 const ScoreTooltip = ({ active, payload, label }: TooltipContentProps<string | number, string>) => {
     const isVisible = active && payload && payload.length;
     return (
-        <div className="custom-tooltip bg-gray-950 border-indigo-400 border-solid border-1" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+        <div className="custom-tooltip bg-gray-950 border-[#E0E0E0] border-solid border-1" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
             {isVisible && (
                 <>
                     <div className="p-2 font-mono">
@@ -36,7 +36,7 @@ function ScoreGraph({ scoreData }: { scoreData: Record<string, number> }) {
                 <XAxis dataKey="teamName" tick={{ className: "font-mono fill-gray-200" }} />
                 <YAxis width="auto" tick={{ className: "font-mono fill-gray-200" }} />
                 <Tooltip content={ScoreTooltip} />
-                <Bar dataKey="score" className="fill-indigo-400 stroke-indigo-400" />
+                <Bar dataKey="score" className="fill-[#E0E0E0] stroke-[#E0E0E0]" />
             </BarChart>
         </>
     )
