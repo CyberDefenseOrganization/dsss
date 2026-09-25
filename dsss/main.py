@@ -262,6 +262,10 @@ def get_config() -> Config:
     # teams = {name: make_team(name, service_defs) for name in team_names}
 
     config = Config(
+        event_name_long="Great Dane Defense Competition",
+        event_name_short="GDDC",
+        organization_name_long="Cyber Defense Organization",
+        organization_name_short="CDO",
         port=8080,
         target_round_time=35,
         teams=teams,
