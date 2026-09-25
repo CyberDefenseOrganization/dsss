@@ -4,6 +4,19 @@ from dsss.api.shared import get_engine, make_response
 
 router = APIRouter()
 
+@router.get("/info")
+async def get_info(request: Request):
+    engine = get_engine(request)
+
+    return make_response(
+        engine,
+        **{
+            "event_name_long": engine.config.event_name_long,
+            "event_name_short": engine.config.event_name_short,
+            "organization_name_long": engine.config.organization_name_long,
+            "organization_name_short": engine.config.organization_name_short,
+        },
+    )
 
 @router.get("/scores")
 async def get_scores(request: Request):
