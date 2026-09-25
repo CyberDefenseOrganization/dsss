@@ -2,10 +2,10 @@ import socket
 import aioping
 from typing import override
 
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import AsyncCheck
 
 
-class PingCheck(BaseCheck):
+class PingCheck(AsyncCheck):
     def __init__(self, host: str, timeout_seconds: float = 10) -> None:
         super().__init__(host, None, timeout_seconds=timeout_seconds)
 

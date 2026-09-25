@@ -1,10 +1,10 @@
 from typing import override
 import aioftp
 
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import AsyncCheck
 
 
-class FTPCheck(BaseCheck):
+class FTPCheck(AsyncCheck):
     username: str
     password: str
 

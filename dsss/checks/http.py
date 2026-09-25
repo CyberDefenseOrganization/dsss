@@ -1,10 +1,10 @@
 from typing import override
 import aiohttp
 
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import AsyncCheck
 
 
-class HTTPCheck(BaseCheck):
+class HTTPCheck(AsyncCheck):
     """
     Performs a GET request to the specified host
     """

@@ -5,6 +5,7 @@ from asyncio import Task
 from typing import TypedDict
 
 from dsss.config import Config
+from dsss.checks.base import AsyncCheck, SyncCheck
 from dsss.service import Service
 from dsss.team import Team
 from dsss.logger import get_logger
@@ -224,8 +225,15 @@ class Engine:
     ) -> tuple[str, str, bool, str | None]:
         async with self.task_semaphore:
             try:
+                if isinstance(service.check, AsyncCheck):
+                    check_result = service.check.check()
+                elif isinstance(service.check, SyncCheck):
+                    check_result = asyncio.to_thread(service.check.check)
+                else:
+                    raise TypeError(f"Unsupported check type: {type(service.check).__name__}")
+
                 success, msg = await asyncio.wait_for(
-                    service.check.check(),
+                    check_result,
                     timeout=service.check.timeout_seconds,
                 )
                 return (team.name, service.name, success, msg)

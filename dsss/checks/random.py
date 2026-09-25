@@ -1,10 +1,10 @@
 import random
 from typing import override
 
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import AsyncCheck
 
 
-class RandomCheck(BaseCheck):
+class RandomCheck(AsyncCheck):
     likelihood: float
 
     def __init__(self, likelihood: float = 0.5) -> None:

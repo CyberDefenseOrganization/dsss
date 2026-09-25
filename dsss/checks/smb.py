@@ -1,11 +1,10 @@
 from typing import override
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import SyncCheck
 
-import asyncio
 from smbclient import register_session, listdir
 
 
-class SMBCheck(BaseCheck):
+class SMBCheck(SyncCheck):
     """
     Performs an anonymous LDAP connection against a specified server
     """
@@ -19,13 +18,8 @@ class SMBCheck(BaseCheck):
         super().__init__(host, port, timeout_seconds=timeout_seconds)
 
     @override
-    async def check(self) -> tuple[bool, str | None]:
-        # blocking
-        def do_bind():
-            register_session(self.host, username="scoring", password="bb123#123")
-            for filename in listdir(f"\\\\{self.host}"):
-                print(filename)
-            return True
-
-        response = await asyncio.to_thread(do_bind)
-        return (response, None)
+    def check(self) -> tuple[bool, str | None]:
+        register_session(self.host, username="scoring", password="bb123#123")
+        for filename in listdir(f"\\\\{self.host}"):
+            print(filename)
+        return (True, None)

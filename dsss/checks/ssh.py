@@ -1,12 +1,11 @@
-from math import exp
 from typing import override
 
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import AsyncCheck
 
 import asyncssh
 
 
-class SSHCheck(BaseCheck):
+class SSHCheck(AsyncCheck):
     username: str
     password: str
 

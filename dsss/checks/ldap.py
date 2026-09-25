@@ -1,12 +1,10 @@
 from typing import override
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import SyncCheck
 
-from ldap3 import Server, Connection, ALL, ASYNC
-import asyncio
-import smbclient
+from ldap3 import Server, Connection, ALL
 
 
-class LDAPCheck(BaseCheck):
+class LDAPCheck(SyncCheck):
     """
     Performs an anonymous LDAP connection against a specified server
     """
@@ -48,16 +46,9 @@ class LDAPCheck(BaseCheck):
         super().__init__(host, None, timeout_seconds=timeout_seconds)
 
     @override
-    async def check(self) -> tuple[bool, str | None]:
+    def check(self) -> tuple[bool, str | None]:
         server = Server(self.host, get_info=ALL, use_ssl=self.tls)
-
-        # blocking
-        def do_bind():
-            with Connection(
-                server, authentication="ANONYMOUS", receive_timeout=self.timeout_seconds
-            ) as conn:
-                ok = conn.bind()
-                return ok
-
-        response = await asyncio.to_thread(do_bind)
-        return (response, None)
+        with Connection(
+            server, authentication="ANONYMOUS", receive_timeout=self.timeout_seconds
+        ) as conn:
+            return (conn.bind(), None)

@@ -1,10 +1,10 @@
 from typing import override
 import asyncio
 
-from dsss.checks.base import BaseCheck
+from dsss.checks.base import AsyncCheck
 
 
-class TCPCheck(BaseCheck):
+class TCPCheck(AsyncCheck):
     messages: list[str] | None
     expected_response: str | None
 
