@@ -47,7 +47,7 @@ function Login({ setLoggedIn }: { setLoggedIn: (value: boolean) => void }) {
                     Sign in
                 </button>
 
-                {message && <p className="border border-rose-300/50 bg-rose-300/10 p-3 text-sm text-rose-100" role="alert">{message}</p>}
+                {message && <p className="border p-3 text-sm bg-black" role="alert">{message}</p>}
             </form>
         </section>
     );
