@@ -48,3 +48,21 @@ export async function getAdminStatus(): Promise<AdminStatus> {
     if (!res.ok) throw new Error(`Admin status request failed: ${res.status}`);
     return res.json();
 }
+
+async function setScoringState(action: "pause" | "resume"): Promise<void> {
+    const res = await fetch(`/api/admin/${action}`, {
+        method: "POST",
+        credentials: "include",
+    });
+    if (!res.ok) throw new Error(`Unable to ${action} scoring (${res.status}).`);
+    const result: { success: boolean; message?: string } = await res.json();
+    if (!result.success) throw new Error(result.message || `Unable to ${action} scoring.`);
+}
+
+export function pauseScoring() {
+    return setScoringState("pause");
+}
+
+export function startScoring() {
+    return setScoringState("resume");
+}

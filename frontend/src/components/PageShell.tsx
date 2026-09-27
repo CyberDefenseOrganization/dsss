@@ -26,7 +26,7 @@ function PageShell({
         <div ref={shellRef} className="flex min-h-screen w-full flex-col bg-black text-[#e0e0e0]">
             <Header />
 
-            <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-9 px-4 py-4 sm:gap-12 sm:px-6 sm:py-6">
+            <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-2 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
                 {children}
             </main>
 
