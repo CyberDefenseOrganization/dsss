@@ -18,10 +18,16 @@ function Admin() {
         let active = true;
         getAdminStatus()
             .then((status) => {
-                if (active) setLoggedIn(status.success);
+                if (active) {
+                    setLoggedIn(status.success);
+                    if (!status.success) setSessionExists(false);
+                }
             })
             .catch(() => {
-                if (active) setLoggedIn(false);
+                if (active) {
+                    setLoggedIn(false);
+                    setSessionExists(false);
+                }
             });
 
         return () => {

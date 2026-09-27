@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { useBranding } from "../hooks/useBranding";
+import { getInformation, type InfoResponse } from "../api/status";
+
+let informationRequest: Promise<InfoResponse> | undefined;
 
 const routes = [
     { name: "Scoreboard", path: "/" },
@@ -11,7 +13,16 @@ const routes = [
 function Header() {
     const location = useLocation();
     const [open, setOpen] = useState(false);
-    const information = useBranding();
+    const [information, setInformation] = useState<InfoResponse | null>(null);
+
+    useEffect(() => {
+        let active = true;
+        informationRequest ??= getInformation();
+        void informationRequest.then((data) => {
+            if (active) setInformation(data);
+        }).catch(() => {});
+        return () => { active = false; };
+    }, []);
     const [failedLogo, setFailedLogo] = useState<string | null>(null);
     const configuredLogo = information?.logo_url;
     const logoSource = configuredLogo && configuredLogo !== failedLogo ? configuredLogo : null;
@@ -20,6 +31,8 @@ function Header() {
 
     return (
         <header className="sticky top-0 z-30 mx-auto w-full max-w-5xl border-b border-[#e0e0e0] bg-black/95 backdrop-blur-sm">
+            <title>{information?.event_name_short || eventName}</title>
+            <link rel="icon" href={information?.logo_url || "data:,"} />
             <div className="flex h-16 items-center justify-between gap-6 px-4 sm:px-6 md:h-18 md:px-4">
                 <Link to="/" aria-label={`${eventName} scoreboard`} title={`${eventName} · ${organizationName}`} className="flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
                     {logoSource && (

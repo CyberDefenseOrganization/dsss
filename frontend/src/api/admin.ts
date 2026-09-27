@@ -41,9 +41,10 @@ export interface AdminStatus extends PolledAPIResponse {
 }
 
 export async function getAdminStatus(): Promise<AdminStatus> {
-    const res = await fetch("/api/admin/get_status", {
+    const res = await fetch("/api/admin/status", {
         credentials: "include",
     });
 
+    if (!res.ok) throw new Error(`Admin status request failed: ${res.status}`);
     return res.json();
 }

@@ -33,6 +33,18 @@ input {
   font: inherit;
 }
 
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
 ::selection {
   color: #000;
   background: #e0e0e0;

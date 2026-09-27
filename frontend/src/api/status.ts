@@ -31,6 +31,7 @@ export async function getOverview(): Promise<OverviewResponse> {
 
 export async function getInformation(): Promise<InfoResponse> {
     const res = await fetch("/api/status/info");
+    if (!res.ok) throw new Error(`Branding request failed: ${res.status}`);
     return res.json();
 }
 
