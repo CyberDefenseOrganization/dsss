@@ -52,8 +52,6 @@ class Engine:
         self.workers = WorkerPool(config.num_worker_processes)
 
         self.db = sqlite3.connect(self.config.database_path)
-        self.update_caches()
-
         _ = self.db.execute("""
             CREATE TABLE IF NOT EXISTS results (
                 round INTEGER,
@@ -68,6 +66,7 @@ class Engine:
         self.current_round = (
             self.db.execute("SELECT MAX(round) FROM results").fetchone()[0] or 0
         )
+        self.update_caches()
 
     async def start(self):
         logger.info("Starting Engine")
