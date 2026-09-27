@@ -1,21 +1,33 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { OverviewResponse } from "../api/status";
 
 function Overview({ overviewData, fullscreen }: { overviewData: OverviewResponse; fullscreen: boolean }) {
     const teams = Object.entries(overviewData.overview);
     const services = [...new Set(teams.flatMap(([, team]) => Object.keys(team.services)))];
-    const [tooltip, setTooltip] = useState<{ title: string; message: string, left: number; top: number; above: boolean } | null>(null);
+    const [tooltip, setTooltip] = useState<{ title: string; message: string; center: number; top: number; bottom: number } | null>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
 
-    const showTooltip = (element: HTMLElement, title: string, message: string) => {
+    useLayoutEffect(() => {
+        if (!tooltip || !tooltipRef.current) return;
+
+        const card = tooltipRef.current;
+        const width = card.offsetWidth;
+        const height = card.offsetHeight;
+        card.style.left = `${Math.max(8, Math.min(tooltip.center - width / 2, window.innerWidth - width - 8))}px`;
+        const below = tooltip.bottom + 8;
+        const above = tooltip.top - height - 8;
+        card.style.top = `${below + height <= window.innerHeight - 8 ? below : Math.max(8, above)}px`;
+    }, [tooltip]);
+
+    const tooltipFor = (element: HTMLElement, title: string, message: string) => {
         const rect = element.getBoundingClientRect();
-        const above = rect.bottom + 80 > window.innerHeight;
-        setTooltip({
+        return {
             title,
             message,
-            left: Math.max(8, Math.min(rect.left, window.innerWidth - 328)),
-            top: above ? rect.top - 8 : rect.bottom + 8,
-            above,
-        });
+            center: rect.left + rect.width / 2,
+            top: rect.top,
+            bottom: rect.bottom,
+        };
     };
 
     if (teams.length === 0) {
@@ -60,17 +72,33 @@ function Overview({ overviewData, fullscreen }: { overviewData: OverviewResponse
                                     return (
                                         <td
                                             key={service}
-                                            className="border-b border-l border-white/10 px-4 py-3 text-center"
-                                            onPointerEnter={(event) => showTooltip(event.currentTarget, title, status?.message)}
-                                            onPointerLeave={() => setTooltip(null)}
-                                            onFocus={(event) => showTooltip(event.currentTarget, title, status?.message)}
-                                            onBlur={() => setTooltip(null)}
+                                            className="cursor-pointer border-b border-l border-white/10 px-4 py-3 text-center"
+                                            onPointerEnter={(event) => {
+                                                if (event.pointerType !== "touch") setTooltip(tooltipFor(event.currentTarget, title, status?.message));
+                                            }}
+                                            onPointerLeave={(event) => {
+                                                if (event.pointerType !== "touch") setTooltip(null);
+                                            }}
+                                            onClick={(event) => {
+                                                const nextTooltip = tooltipFor(event.currentTarget, title, status?.message);
+                                                setTooltip((current) => current?.title === title ? null : nextTooltip);
+                                            }}
                                         >
-                                            <span
-                                                className="inline-flex size-7 cursor-help items-center justify-center rounded-full outline-offset-2 focus-visible:outline focus-visible:outline-white"
+                                            <button
+                                                type="button"
+                                                aria-label={`${title}: ${status ? (status.online ? "online" : "offline") : "no result"}`}
+                                                aria-expanded={tooltip?.title === title}
+                                                className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full outline-offset-2 focus-visible:outline focus-visible:outline-white"
+                                                onFocus={(event) => {
+                                                    if (event.currentTarget.matches(":focus-visible")) setTooltip(tooltipFor(event.currentTarget.closest("td")!, title, status?.message));
+                                                }}
+                                                onBlur={() => setTooltip(null)}
+                                                onKeyDown={(event) => {
+                                                    if (event.key === "Escape") setTooltip(null);
+                                                }}
                                             >
                                                 <span aria-hidden="true" className={`size-3.5 rounded-full ${status ? (status.online ? "bg-green-400" : "bg-red-400") : "bg-white/40"}`} />
-                                            </span>
+                                            </button>
                                         </td>
                                     );
                                 })}
@@ -81,9 +109,10 @@ function Overview({ overviewData, fullscreen }: { overviewData: OverviewResponse
             </div>
             {tooltip && (
                 <div
+                    ref={tooltipRef}
                     role="tooltip"
                     className="pointer-events-none fixed z-50 max-w-[min(20rem,calc(100vw-1rem))] border border-white/50 bg-black px-3 py-2 text-sm text-[#e0e0e0] shadow-xl"
-                    style={{ left: tooltip.left, top: tooltip.top }}
+                    style={{ left: 8, top: 8 }}
                 >
                     <p className="font-semibold border-b border-white/40">{tooltip.title}</p>
                     <p className="mt-1 text-[#E0E0E0]">{tooltip.message}</p>
