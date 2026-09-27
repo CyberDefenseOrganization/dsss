@@ -54,6 +54,21 @@ npm install
 npm run dev
 ```
 
+### Header logo
+
+Set `logo_path` in the `Config` created by `get_config()` in `dsss/main.py` to
+the image file you want in the top-left corner, for example
+`logo_path="branding/competition-logo.png"`. Both strings and `pathlib.Path`
+objects are accepted. Relative paths are resolved from the backend's working
+directory; absolute paths also work. The backend serves the file directly, so
+there is no need to put it in the frontend or rebuild the frontend.
+Restart the backend after changing the setting. In Docker, mount the image and
+use its path inside the container. The frontend also uses this image as its tab
+icon. Leaving `logo_path=None` (or an image that cannot load) shows the configured
+event and organization names in the header instead.
+The browser title uses `event_name_short`, falling back to `event_name_long`.
+All branding comes from the backend's `/api/status/info` response.
+
 ## Creating Checks
 Checks are simply classes that inherit from either the `AsyncCheck`, or `SyncCheck` base classes, and implement a `check()` method that returns: `(success: bool, message: str)`.
 

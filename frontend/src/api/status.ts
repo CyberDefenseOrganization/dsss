@@ -52,5 +52,6 @@ export interface InfoResponse extends PolledAPIResponse {
     event_name_long: string,
     event_name_short: string,
     organization_name_long: string,
-    organization_name_short: string
+    organization_name_short: string,
+    logo_url?: string | null
 }

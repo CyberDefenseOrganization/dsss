@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
-import logo from "../assets/logo-white-est-text.png";
+import { useBranding } from "../hooks/useBranding";
 
 const routes = [
     { name: "Scoreboard", path: "/" },
@@ -11,12 +11,24 @@ const routes = [
 function Header() {
     const location = useLocation();
     const [open, setOpen] = useState(false);
+    const information = useBranding();
+    const [failedLogo, setFailedLogo] = useState<string | null>(null);
+    const configuredLogo = information?.logo_url;
+    const logoSource = configuredLogo && configuredLogo !== failedLogo ? configuredLogo : null;
+    const eventName = information?.event_name_long || information?.event_name_short || "Scoreboard";
+    const organizationName = information?.organization_name_long || information?.organization_name_short || eventName;
 
     return (
         <header className="sticky top-0 z-30 mx-auto w-full max-w-5xl border-b border-[#e0e0e0] bg-black/95 backdrop-blur-sm">
             <div className="flex h-16 items-center justify-between gap-6 px-4 sm:px-6 md:h-18 md:px-4">
-                <Link to="/" aria-label="Great Dane Defense Competition scoreboard" onClick={() => setOpen(false)}>
-                    <img src={logo} alt="Cyber Defense Organization" className="h-10 w-auto max-w-full md:h-12" />
+                <Link to="/" aria-label={`${eventName} scoreboard`} title={`${eventName} · ${organizationName}`} className="flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
+                    {logoSource && (
+                        <img src={logoSource} alt="" onError={() => setFailedLogo(logoSource)} className="h-10 w-auto shrink-0 md:h-12" />
+                    )}
+                    <div className="flex min-w-0 flex-col">
+                        <span className="truncate text-lg font-bold">{information?.event_name_short || eventName}</span>
+                        {information && <span className="truncate text-xs text-[#b8b8b8]">{information.organization_name_short || organizationName}</span>}
+                    </div>
                 </Link>
 
                 <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">

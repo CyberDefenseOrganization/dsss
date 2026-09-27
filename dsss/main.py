@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+from pathlib import Path
 
 from collections.abc import Sequence
 from dsss.checks.base import BaseCheck
@@ -266,6 +267,7 @@ def get_config() -> Config:
         event_name_short="GDDC",
         organization_name_long="Cyber Defense Organization",
         organization_name_short="CDO",
+        logo_path=Path(__file__).parent / "assets" / "shield.png",
         port=8080,
         target_round_time=35,
         teams=teams,

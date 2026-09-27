@@ -7,9 +7,11 @@ import Home from './pages/Home.tsx';
 import Overview from './pages/Overview.tsx';
 import NotFound from './pages/NotFound.tsx';
 import Admin from './pages/Admin.tsx';
+import BrandingProvider from './components/BrandingProvider.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <BrandingProvider>
     <BrowserRouter>
       <Routes>
         <Route index element={<Home />} />
@@ -18,5 +20,6 @@ createRoot(document.getElementById('root')!).render(
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+    </BrandingProvider>
   </StrictMode>,
 )

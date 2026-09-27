@@ -12,7 +12,7 @@ function Home() {
     return (
         <PageShell data={scoreData}>
             {scoreData && roundData ? (
-                <Fullscreen keyboard className="flex flex-col gap-9 sm:gap-12">
+                <Fullscreen keyboard className="flex flex-col gap-6 sm:gap-8">
                     {(isFullscreen) => {
                         const sectionClass = isFullscreen ? "flex min-h-0 flex-1 flex-col" : "";
                         const chartClass = isFullscreen
