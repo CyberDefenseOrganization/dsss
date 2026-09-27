@@ -1,15 +1,70 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Adwaita Sans";
+  src: url("./assets/fonts/AdwaitaSans-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
-  color-scheme: dark;
+  color: #e0e0e0;
+  background: #000;
+  font-family: "Adwaita Sans", sans-serif;
+}
 
+body {
+  min-width: 320px;
 }
 
 #root {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  color: #000;
+  background: #e0e0e0;
+}
+
+.overview-scrollbar {
+  color-scheme: dark;
+}
+
+.overview-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.overview-scrollbar::-webkit-scrollbar-track,
+.overview-scrollbar::-webkit-scrollbar-corner {
+  background: #101010;
+}
+
+.overview-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid #101010;
+  border-radius: 999px;
+  background: #666;
+}
+
+.overview-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .overview-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #666 #101010;
+  }
 }

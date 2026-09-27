@@ -1,14 +1,12 @@
-import Header from "../components/Header";
+import PageShell from "../components/PageShell";
 
 function NotFound() {
-    return (
-        <>
-            <Header />
-            <div className="flex flex-col w-full h-full items-center bg-black overflow-y-scroll">
-                <b>{"Page not found, nerd"}</b>
-            </div>
-        </>
-    );
+  return (
+    <PageShell>
+      <h1 className="text-xl font-semibold text-white sm:text-2xl">Page not found</h1>
+      <div className="border border-white/40 p-6 text-sm text-[#E0E0E0]">Check the address or return to the scoreboard.</div>
+    </PageShell>
+  );
 }
 
 export default NotFound;

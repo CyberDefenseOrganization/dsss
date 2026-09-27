@@ -135,7 +135,7 @@ class WorkerPool:
     async def __aenter__(self):
         # attempt to spawn all workers
         try:
-            logger.debug("Spawning %s worker processes", len(self.workers))
+            logger.info("Spawning %s worker processes", len(self.workers))
 
             # we use return_exceptions here to ensure that all workers finish starting
             # before we handle any errors.

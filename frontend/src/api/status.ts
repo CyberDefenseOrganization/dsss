@@ -25,6 +25,7 @@ export async function getRoundHistoryCumulative(): Promise<RoundHistoryResponse>
 
 export async function getOverview(): Promise<OverviewResponse> {
     const res = await fetch("/api/status/get_overview");
+    if (!res.ok) throw new Error(`Service overview request failed: ${res.status}`);
     return res.json();
 }
 
@@ -41,4 +42,3 @@ interface ServiceStatus {
 export interface OverviewResponse extends PolledAPIResponse {
     overview: Record<string, TeamOverview>
 }
-
