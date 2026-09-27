@@ -1,84 +1,70 @@
-import { Link } from "react-router";
-import logo from '../assets/logo.png'
-
 import { useState } from "react";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
+import logo from "../assets/logo-white-est-text.png";
+
+const routes = [
+    { name: "Scoreboard", path: "/" },
+    { name: "Service overview", path: "/overview" },
+    { name: "Admin", path: "/admin" },
+];
 
 function Header() {
     const location = useLocation();
     const [open, setOpen] = useState(false);
 
-    const routes = [
-        ["Scoreboard", "/"],
-        ["Overview", "/overview"],
-        ["Teams", "/teams"],
-        ["Services", "/services"],
-        ["Admin", "/admin"],
-    ];
-
     return (
-        <>
-            <header className="bg-gray-950 w-full h-auto border-0 border-b-indigo-400 border-solid border-b-1">
-                <div className="mx-auto max-w-9xl px-2 sm:px-4 lg:px-6">
-                    <div className="relative flex h-12 md:h-16 items-center justify-between">
-                        <div className="flex flex-row justify-center items-center">
-                            <img src={logo} className="h-10 pr-2 pb-0.5">
-                            </img>
-                            <Link to="/" className="hidden sm:block text-xl text-white font-semibold font-mono hover:text-indigo-400 transition-colors duration-200">
-                                {"Great Dane Defense Competition"}
-                            </Link>
-                            <Link to="/" className="sm:hidden text-xl text-white font-semibold font-mono">
-                                {"GDDC"}
-                            </Link>
-                        </div>
-                        <div className="flex-row hidden lg:flex">
-                            {routes.map((route) => (
-                                <Link className="flex flex-row text-xl text-gray-300 font-mono p-2 hover:text-white transition-colors duration-200" to={route[1]} >
-                                    <p className="text-indigo-400">
-                                        {"/ "}
-                                    </p>
-                                    <p className={(location.pathname == route[1]) ? "text-indigo-400" : ""}>
-                                        {route[0]}
-                                    </p>
-                                </Link>
-                            ))}
-                        </div>
+        <header className="sticky top-0 z-30 mx-auto w-full max-w-5xl border-b border-[#e0e0e0] bg-black/95 backdrop-blur-sm">
+            <div className="flex h-16 items-center justify-between gap-6 px-4 sm:px-6 md:h-18 md:px-4">
+                <Link to="/" aria-label="Great Dane Defense Competition scoreboard" onClick={() => setOpen(false)}>
+                    <img src={logo} alt="Cyber Defense Organization" className="h-10 w-auto max-w-full md:h-12" />
+                </Link>
 
-                        <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="stroke-white lg:hidden" onClick={() => setOpen(true)}>
-                            <path d="M7 10H41" stroke-width="2" />
-                            <path d="M7 24H41" stroke-width="2" />
-                            <path d="M7 38H41" stroke-width="2" />
-                        </svg>
-
-                        <div
-                            className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                                }`}
-                            onClick={() => setOpen(false)}
-                        />
-
-                        <div
-                            className={`p-4 fixed top-0 right-0 h-full w-38 bg-gray-950 shadow-lg transform transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"
-                                }`}
-
+                <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
+                    {routes.map(({ name, path }) => (
+                        <Link
+                            key={path}
+                            to={path}
+                            aria-current={location.pathname === path ? "page" : undefined}
+                            className={`text-nowrap text-base font-bold uppercase tracking-wider text-[#e0e0e0] hover:text-white ${location.pathname === path ? "underline underline-offset-4" : ""}`}
                         >
-                            <div className="flex-row lg:flex">
-                                {routes.map((route) => (
-                                    <Link className="flex flex-row text-gray-300 font-mono p-2 hover:text-white transition-colors duration-200" to={route[1]} >
-                                        <p className="text-indigo-400">
-                                            {"/ "}
-                                        </p>
-                                        <p className={(location.pathname == route[1]) ? "text-indigo-400" : ""}>
-                                            {route[0]}
-                                        </p>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header >
-        </>
-    )
+                            {name}
+                        </Link>
+                    ))}
+                </nav>
+
+                <button
+                    type="button"
+                    className="flex size-11 shrink-0 items-center justify-center text-[#e0e0e0] hover:text-white md:hidden"
+                    aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+                    aria-controls="mobile-navigation"
+                    aria-expanded={open}
+                    onClick={() => setOpen((value) => !value)}
+                >
+                    <span className="relative block h-5 w-7" aria-hidden="true">
+                        <span className={`absolute left-0 top-0 h-0.5 w-7 bg-current transition-transform ${open ? "translate-y-[9px] rotate-45" : ""}`} />
+                        <span className={`absolute left-0 top-[9px] h-0.5 w-7 bg-current transition-opacity ${open ? "opacity-0" : ""}`} />
+                        <span className={`absolute bottom-0 left-0 h-0.5 w-7 bg-current transition-transform ${open ? "-translate-y-[9px] -rotate-45" : ""}`} />
+                    </span>
+                </button>
+            </div>
+
+            {open && (
+                <nav id="mobile-navigation" className="absolute inset-x-0 top-full border-b border-[#e0e0e0] bg-black px-4 py-2 shadow-2xl md:hidden" aria-label="Mobile navigation">
+                    {routes.map(({ name, path }) => (
+                        <Link
+                            key={path}
+                            to={path}
+                            aria-current={location.pathname === path ? "page" : undefined}
+                            onClick={() => setOpen(false)}
+                            className={`block border-b border-white/15 py-3 text-base font-bold uppercase tracking-wider text-[#e0e0e0] last:border-0 hover:text-white ${location.pathname === path ? "underline underline-offset-4" : ""}`}
+                        >
+                            {name}
+                        </Link>
+                    ))}
+                </nav>
+            )}
+        </header>
+    );
 }
 
 export default Header;

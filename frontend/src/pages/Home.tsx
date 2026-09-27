@@ -1,30 +1,56 @@
-import Header from "../components/Header";
 import RoundGraph from "../components/RoundGraph";
 import ScoreGraph from "../components/ScoreGraph";
-import { useStatusPoller } from "../hooks/useStatusPoller";
+import Fullscreen from "../components/Fullscreen";
+import PageShell from "../components/PageShell";
 import { getRoundHistoryCumulative, getScores, type RoundHistoryResponse, type ScoresResponse } from "../api/status";
-import Footer from "../components/Footer";
+import { useStatusPoller } from "../hooks/useStatusPoller";
 
 function Home() {
     const scoreData: ScoresResponse | null = useStatusPoller(getScores);
     const roundData: RoundHistoryResponse | null = useStatusPoller(getRoundHistoryCumulative);
 
     return (
-        <>
-            <Header />
-            <div className="bg-gray-950 flex flex-col w-full h-full items-center overflow-y-scroll">
-                <div className="flex flex-col items-center w-full lg:p-4 lg:w-6xl h-full pt-6 gap-8 lg:gap-14 md:px-4">
-                    {
-                        scoreData && roundData &&
-                        <>
-                            {<ScoreGraph scoreData={scoreData!.scores} />}
-                            {<RoundGraph numRounds={roundData!.currentRound} roundData={roundData!.rounds} />}
-                        </>
-                    }
-                </div>
-            </div >
-            <Footer data={scoreData} />
-        </>
+        <PageShell data={scoreData}>
+            {scoreData && roundData ? (
+                <Fullscreen keyboard className="flex flex-col gap-9 sm:gap-12">
+                    {(isFullscreen) => {
+                        const sectionClass = isFullscreen ? "flex min-h-0 flex-1 flex-col" : "";
+                        const chartClass = isFullscreen
+                            ? "min-h-0 flex-1 border border-white/40 p-3"
+                            : "h-80 border border-white/40 bg-black p-3 sm:h-96 sm:p-5";
+
+                        return (
+                            <>
+                                <section className={sectionClass}>
+                                    {!isFullscreen && <h1 className="mb-4 text-xl font-semibold text-white sm:text-2xl">Competition leaderboard</h1>}
+                                    <Fullscreen buttonLabel="Competition leaderboard" className={`flex flex-col gap-2 ${chartClass}`}>
+                                        {() => (
+                                            <div className="min-h-0 flex-1">
+                                                <ScoreGraph scoreData={scoreData.scores} />
+                                            </div>
+                                        )}
+                                    </Fullscreen>
+                                </section>
+                                <section className={sectionClass}>
+                                    {!isFullscreen && <h2 className="mb-4 text-xl font-semibold text-white sm:text-2xl">Score by round</h2>}
+                                    <Fullscreen buttonLabel="Score by round" className={`flex flex-col gap-2 ${chartClass}`}>
+                                        {() => (
+                                            <div className="min-h-0 flex-1">
+                                                <RoundGraph numRounds={roundData.currentRound} roundData={roundData.rounds} />
+                                            </div>
+                                        )}
+                                    </Fullscreen>
+                                </section>
+                            </>
+                        );
+                    }}
+                </Fullscreen>
+            ) : (
+                <p className="text-sm text-center text-[#E0E0E0]">
+                    Loading data...
+                </p>
+            )}
+        </PageShell>
     );
 }
 

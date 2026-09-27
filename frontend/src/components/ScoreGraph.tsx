@@ -1,45 +1,43 @@
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, type TooltipContentProps } from "recharts";
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Tooltip,
+    XAxis,
+    YAxis,
+    type TooltipContentProps,
+} from "recharts";
 
+const axisStyle = { fontSize: 12, fill: "#b8b8b8" };
 
 const ScoreTooltip = ({ active, payload, label }: TooltipContentProps<string | number, string>) => {
-    const isVisible = active && payload && payload.length;
-    return (
-        <div className="custom-tooltip bg-gray-950 border-indigo-400 border-solid border-1" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
-            {isVisible && (
-                <>
-                    <div className="p-2 font-mono">
-                        <p className="label">{`${label} : ${payload[0].value}`}</p>
+    if (!active || !payload?.length) return null;
 
-                    </div>
-                </>
-            )}
+    return (
+        <div className="border border-white/50 bg-black px-3 py-2 text-sm text-white shadow-xl">
+            <p className="font-semibold">{label}</p>
+            <p className="mt-1 text-[#E0E0E0]">{payload[0].value} points</p>
         </div>
     );
 };
 
 function ScoreGraph({ scoreData }: { scoreData: Record<string, number> }) {
-    let formattedScoredData = []
-
-    for (const [teamName, score] of Object.entries(scoreData)) {
-        formattedScoredData.push({ teamName, score });
-    }
+    const data = Object.entries(scoreData).map(([teamName, score]) => ({ teamName, score }));
 
     return (
-        <>
-            <BarChart
-                className="h-full w-full"
-                responsive
-
-                data={formattedScoredData}
-            >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="teamName" tick={{ className: "font-mono fill-gray-200" }} />
-                <YAxis width="auto" tick={{ className: "font-mono fill-gray-200" }} />
-                <Tooltip content={ScoreTooltip} />
-                <Bar dataKey="score" className="fill-indigo-400 stroke-indigo-400" />
-            </BarChart>
-        </>
-    )
+        <BarChart
+            responsive
+            className="h-full w-full bg-black"
+            data={data}
+            margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
+        >
+            <CartesianGrid stroke="#ffffff20" vertical={false} />
+            <XAxis dataKey="teamName" tick={axisStyle} tickLine={false} axisLine={{ stroke: "#ffffff55" }} />
+            <YAxis width="auto" tick={axisStyle} tickLine={false} axisLine={false} />
+            <Tooltip content={ScoreTooltip} cursor={{ fill: "#ffffff10" }} />
+            <Bar dataKey="score" fill="#e0e0e0" maxBarSize={46} />
+        </BarChart>
+    );
 }
 
 export default ScoreGraph;

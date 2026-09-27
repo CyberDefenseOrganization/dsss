@@ -1,60 +1,76 @@
-import { useState } from "react";
-
-import Header from "../components/Header";
+import { useEffect, useState } from "react";
 import Login from "../components/Login";
-
+import PageShell from "../components/PageShell";
 import { getAdminStatus, logout } from "../api/admin";
 import { useStatusPollerConditionally } from "../hooks/useStatusPoller";
-import Footer from "../components/Footer";
 
 function Admin() {
-    const cookieExists = (cookieName: string): boolean => {
-        return document.cookie.split(";").some(
-            item => item
-                .trim()
-                .startsWith(cookieName + "=")
-        )
-    }
+    const cookieExists = (cookieName: string): boolean =>
+        document.cookie.split(";").some((item) => item.trim().startsWith(`${cookieName}=`));
 
     const [sessionExists, setSessionExists] = useState(cookieExists("session_token_timestamp"));
     const [loggedIn, setLoggedIn] = useState(sessionExists);
     const adminData = useStatusPollerConditionally(getAdminStatus, loggedIn);
 
+    useEffect(() => {
+        if (!sessionExists) return;
+
+        let active = true;
+        getAdminStatus()
+            .then((status) => {
+                if (active) setLoggedIn(status.success);
+            })
+            .catch(() => {
+                if (active) setLoggedIn(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [sessionExists]);
 
     const handleLogout = async () => {
         await logout();
         setSessionExists(false);
         setLoggedIn(false);
-    }
-
-    if (sessionExists) {
-        getAdminStatus().then((adminStatus) => {
-            setLoggedIn(adminStatus.success);
-        })
-    }
+    };
 
     return (
-        <>
-            <Header />
-            <div className="bg-gray-950 flex flex-col w-full h-full items-center overflow-y-scroll">
-                <div className="flex flex-col items-center w-full lg:p-4 lg:w-6xl h-full pt-6 gap-8 lg:gap-14 md:px-4">
-                    {loggedIn ? adminData &&
-                        <div className="border-indigo-400 border-1 p-6 w-3xl flex flex-col font-mono">
-                            <div className="text-2xl">
-                                Admin Panel
-                            </div>
+        <PageShell
+            data={adminData}
+        >
+            {loggedIn ? (
+                <>
+                    <h1 className="text-xl font-semibold text-white sm:text-2xl">Scoring engine</h1>
+                    {adminData ? (
+                        <div className="flex flex-col gap-5 border border-white/40 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
                             <div>
-                                Engine Status: {adminData.paused ? "paused" : "running"}
+                                <p className="mt-2 flex items-center gap-2 text-xl font-semibold text-white">
+                                    <span className={`size-2.5 rounded-full ${adminData.paused ? "bg-amber-300" : "bg-emerald-400"}`} />
+                                    Engine {adminData.paused ? "Paused" : "Running"}
+                                </p>
                             </div>
-
-                            <button className="bg-indigo-400 hover:bg-indigo-500" onClick={handleLogout}> LOGOUT </button>
+                            <button
+                                type="button"
+                                className="min-h-11 border border-white/60 px-5 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-white hover:text-black"
+                                onClick={handleLogout}
+                            >
+                                Log out
+                            </button>
                         </div>
-                        : <Login setLoggedIn={setLoggedIn} />
-                    }
-                </div>
-            </div >
-            <Footer data={adminData} />
-        </>
+                    ) : (
+                        <p className="border border-white/30 p-5 text-sm text-[#E0E0E0]">Checking admin session...</p>
+                    )}
+                </>
+            ) : sessionExists ? (
+                <p className="border border-white/30 p-5 text-sm text-[#E0E0E0]">Checking admin session...</p>
+            ) : (
+                <Login setLoggedIn={(value) => {
+                    setLoggedIn(value);
+                    setSessionExists(value);
+                }} />
+            )}
+        </PageShell>
     );
 }
 

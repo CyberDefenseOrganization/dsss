@@ -25,10 +25,11 @@ export async function getRoundHistoryCumulative(): Promise<RoundHistoryResponse>
 
 export async function getOverview(): Promise<OverviewResponse> {
     const res = await fetch("/api/status/overview");
+    if (!res.ok) throw new Error(`Service overview request failed: ${res.status}`);
     return res.json();
 }
 
-export async function getInformation(): Promise<OverviewResponse> {
+export async function getInformation(): Promise<InfoResponse> {
     const res = await fetch("/api/status/info");
     return res.json();
 }
@@ -53,4 +54,3 @@ export interface InfoResponse extends PolledAPIResponse {
     organization_name_long: string,
     organization_name_short: string
 }
-

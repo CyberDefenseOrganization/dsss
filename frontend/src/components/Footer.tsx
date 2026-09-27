@@ -1,31 +1,41 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { PolledAPIResponse } from "../api/api";
 
-function Footer({ data }: { data: PolledAPIResponse | null }) {
-    if (!data) {
-        return (<></>);
-    }
-
-    const [originalTimeLeft, setOriginalTimeLeft] = useState(data.timeToNextRound);
-    const [timeLeft, setTimeLeft] = useState(data.timeToNextRound);
+function Footer({ data, fullscreenTarget }: {
+    data: (PolledAPIResponse & { paused?: boolean }) | null;
+    fullscreenTarget?: Element | null;
+}) {
+    const [timeLeft, setTimeLeft] = useState(0);
+    const timeToNextRound = data?.timeToNextRound;
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            if (originalTimeLeft != data.timeToNextRound) {
-                setTimeLeft(data.timeToNextRound);
-                setOriginalTimeLeft(data.timeToNextRound);
-            }
-            setTimeLeft((t) => t - 0.5);
-        }, 500);
-        return () => clearInterval(intervalId);
-    }, [originalTimeLeft, timeLeft]);
+        if (timeToNextRound === undefined) return;
 
-    return (
-        <div className="text-xl font-mono font-bold flex justify-between pt-4 bg-gray-950 border-indigo-400 border-t-1 p-2">
-            <div>{`Current round: ${data.currentRound}`}</div >
-            <div>{`Time to next round: ${timeLeft > 0 ? timeLeft.toFixed(0) : 0} seconds`}</div>
-        </div>
-    )
+        const roundEndsAt = Date.now() + timeToNextRound * 1000;
+        const update = () => setTimeLeft(Math.max(0, (roundEndsAt - Date.now()) / 1000));
+        update();
+        const intervalId = window.setInterval(update, 500);
+        return () => window.clearInterval(intervalId);
+    }, [timeToNextRound]);
+
+    const content = (
+        <footer className={`mt-auto flex w-full shrink-0 flex-col items-center ${fullscreenTarget ? "" : "px-4 sm:px-6"}`}>
+            <div className={`h-px w-full bg-[#e0e0e0] ${fullscreenTarget ? "" : "max-w-5xl"}`} />
+            <div className={`flex w-full items-center justify-between gap-2 py-4 font-semibold uppercase tracking-wider text-[#e0e0e0] sm:gap-4 sm:py-5 ${fullscreenTarget ? "flex-row text-lg sm:text-2xl" : "max-w-5xl flex-col text-xs sm:flex-row sm:text-sm"}`}>
+                <span>{data ? `Round ${String(data.currentRound).padStart(2, "0")}` : "Competition scoring"}</span>
+                <span>
+                    {data
+                        ? data.paused
+                            ? "Scoring paused"
+                            : `Next round in ${Math.ceil(timeLeft)} seconds`
+                        : "Waiting for scoring data"}
+                </span>
+            </div>
+        </footer>
+    );
+
+    return fullscreenTarget ? createPortal(content, fullscreenTarget) : content;
 }
 
 export default Footer;

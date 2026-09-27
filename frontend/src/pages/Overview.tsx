@@ -1,26 +1,25 @@
-import Header from "../components/Header";
-import Overview from "../components/Overview";
-
+import PageShell from "../components/PageShell";
+import OverviewTable from "../components/Overview";
+import Fullscreen from "../components/Fullscreen";
+import { getOverview, type OverviewResponse } from "../api/status";
 import { useStatusPoller } from "../hooks/useStatusPoller";
-import { getOverview, type OverviewResponse, } from "../api/status";
-import Footer from "../components/Footer";
 
-function Home() {
+function Overview() {
     const overviewData: OverviewResponse | null = useStatusPoller(getOverview);
 
     return (
-        <>
-            <Header />
-            <div className="bg-gray-950 flex flex-col w-full h-full items-center overflow-y-scroll">
-                <div className="flex flex-col items-center w-full lg:p-4 lg:w-6xl h-full pt-6 gap-8 lg:gap-14 md:px-4">
-                    {
-                        overviewData && <Overview overviewData={overviewData} />
-                    }
-                </div>
-            </div >
-            <Footer data={overviewData} />
-        </>
+        <PageShell data={overviewData}>
+            {overviewData ? (
+                <Fullscreen keyboard className="flex min-w-0 flex-col gap-4">
+                    {(isFullscreen) => <OverviewTable overviewData={overviewData} fullscreen={isFullscreen} />}
+                </Fullscreen>
+            ) : (
+                <p className="text-sm text-center text-[#E0E0E0]">
+                    Loading data...
+                </p>
+            )}
+        </PageShell>
     );
 }
 
-export default Home;
+export default Overview;
