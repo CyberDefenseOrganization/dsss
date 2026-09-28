@@ -5,9 +5,17 @@ from importlib import import_module
 from inspect import isabstract, signature
 from ipaddress import ip_address
 from pkgutil import walk_packages
-from typing import Annotated, ClassVar, cast
+from random import choice
+from typing import Annotated, ClassVar, cast, get_type_hints
 
-from pydantic import AfterValidator, ConfigDict, Field, validate_call
+from pydantic import (
+    AfterValidator,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    ValidationError,
+    validate_call,
+)
 
 
 def validate_host(host: str) -> str:
@@ -67,14 +75,14 @@ class BaseCheck(ABC):
     port: int | None
     timeout_seconds: float = 30
 
-    def __init_subclass__(cls) -> None:
+    def __init_subclass__(cls, *, register: bool = True) -> None:
         """
         __init_subclass__ is called on the definition of sub classes,
         and allows us to basically do reflection
         """
         super().__init_subclass__()
 
-        if isabstract(cls):
+        if not register or isabstract(cls):
             return
 
         name = cls.__dict__.get("name")
@@ -129,7 +137,46 @@ class BaseCheck(ABC):
             key: expand_variables(value, variables) for key, value in options.items()
         }
 
-        return cast(Callable[..., BaseCheck], check)(**options)
+        hints = get_type_hints(check.__init__, include_extras=True)
+        alternatives: dict[str, list[object]] = {}
+        initial = dict(options)
+
+        for key, value in options.items():
+            if not isinstance(value, list) or key not in hints:
+                continue
+
+            adapter = TypeAdapter(hints[key])
+
+            try:
+                adapter.validate_python(value, strict=True)
+            except ValidationError:
+                if not value:
+                    raise ValueError(f"{key}: random alternatives cannot be empty")
+
+                for item in value:
+                    adapter.validate_python(item, strict=True)
+
+                alternatives[key] = value
+                initial[key] = value[0]
+
+        constructor = cast(Callable[..., BaseCheck], check)
+        instance = constructor(**initial)
+        if not alternatives:
+            return instance
+
+        def create_check() -> BaseCheck:
+            return constructor(
+                **{
+                    **options,
+                    **{key: choice(values) for key, values in alternatives.items()},
+                }
+            )
+
+        timeout = max(alternatives.get("timeout_seconds", [instance.timeout_seconds]))
+        if isinstance(instance, AsyncCheck):
+            return _RandomAsyncCheck(instance, create_check, float(timeout))
+
+        return _RandomSyncCheck(instance, create_check, float(timeout))
 
     def __init__(self, host: str, port: int | None, timeout_seconds: float) -> None:
         self.host = host
@@ -147,3 +194,31 @@ class SyncCheck(BaseCheck, ABC):
     @abstractmethod
     def check(self) -> tuple[bool, str | None]:
         pass
+
+
+class _RandomAsyncCheck(AsyncCheck, register=False):
+    def __init__(
+        self, template: BaseCheck, factory: Callable[[], BaseCheck], timeout: float
+    ) -> None:
+        super().__init__(template.host, template.port, timeout)
+        self.factory = factory
+        self.name = template.name
+
+    async def check(self) -> tuple[bool, str | None]:
+        check = self.factory()
+        assert isinstance(check, AsyncCheck)
+        return await check.check()
+
+
+class _RandomSyncCheck(SyncCheck, register=False):
+    def __init__(
+        self, template: BaseCheck, factory: Callable[[], BaseCheck], timeout: float
+    ) -> None:
+        super().__init__(template.host, template.port, timeout)
+        self.factory = factory
+        self.name = template.name
+
+    def check(self) -> tuple[bool, str | None]:
+        check = self.factory()
+        assert isinstance(check, SyncCheck)
+        return check.check()

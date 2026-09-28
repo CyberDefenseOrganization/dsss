@@ -46,9 +46,9 @@ class AdminSettings(Settings):
 
 
 class CheckDefaults(Settings):
-    timeout_seconds: Timeout = 10
-    username: str | None = None
-    password: str | None = None
+    timeout_seconds: Timeout | Annotated[list[Timeout], Field(min_length=1)] = 10
+    username: str | Annotated[list[str], Field(min_length=1)] | None = None
+    password: str | Annotated[list[str], Field(min_length=1)] | None = None
 
 
 class ServiceOverride(Settings):
