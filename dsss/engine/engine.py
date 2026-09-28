@@ -44,7 +44,7 @@ class Engine:
 
     def __init__(self, config: Config) -> None:
         self.config = config
-        self.paused = False
+        self.paused = True
         self.current_round = 0
         self.last_round_finished = time.time()
         self.round_times = []
