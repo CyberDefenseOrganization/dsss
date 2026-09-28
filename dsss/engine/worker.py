@@ -16,6 +16,7 @@ from dsss.logger import get_logger
 logger = get_logger("Workers")
 
 WORKER_READY = b"ready\n"
+WORKER_TIMEOUT_GRACE_SECONDS = 5.0
 
 
 class CheckRequest(BaseModel):
@@ -186,7 +187,7 @@ class WorkerPool:
                     worker.worker_id,
                 )
                 await worker.start()
-            async with asyncio.timeout(timeout):
+            async with asyncio.timeout(timeout + WORKER_TIMEOUT_GRACE_SECONDS):
                 return await worker.check(team, service)
 
         except (Exception, asyncio.CancelledError):

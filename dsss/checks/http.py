@@ -29,7 +29,9 @@ class HTTPCheck(AsyncCheck):
     @override
     async def check(self) -> tuple[bool, str | None]:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(
+                timeout=aiohttp.ClientTimeout(total=self.timeout_seconds)
+            ) as session:
                 async with session.get(self.url, ssl=False) as response:
                     if response.status != 200:
                         return (
@@ -55,3 +57,5 @@ class HTTPCheck(AsyncCheck):
             return (False, "Client response error")
         except aiohttp.ClientConnectionError:
             return (False, "Unable to connect to host")
+        except TimeoutError:
+            return (False, "Timeout occurred")

@@ -17,7 +17,17 @@ class SMBCheck(SyncCheck):
 
     @override
     def check(self) -> tuple[bool, str | None]:
-        register_session(self.host, username="scoring", password="bb123#123")
-        for filename in listdir(f"\\\\{self.host}"):
+        register_session(
+            self.host,
+            username="scoring",
+            password="bb123#123",
+            port=self.port,
+            connection_timeout=self.timeout_seconds,
+        )
+        for filename in listdir(
+            f"\\\\{self.host}",
+            port=self.port,
+            connection_timeout=self.timeout_seconds,
+        ):
             print(filename)
         return (True, None)

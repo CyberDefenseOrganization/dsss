@@ -25,22 +25,26 @@ class TCPCheck(AsyncCheck):
 
     @override
     async def check(self) -> tuple[bool, str | None]:
-        reader, writer = await asyncio.open_connection(self.host, self.port)
         try:
-            if self.messages is None:
-                return (True, "Service is online")
+            async with asyncio.timeout(self.timeout_seconds):
+                reader, writer = await asyncio.open_connection(self.host, self.port)
+                try:
+                    if self.messages is None:
+                        return (True, "Service is online")
 
-            for message in self.messages:
-                writer.write(message.encode())
-                await writer.drain()
+                    for message in self.messages:
+                        writer.write(message.encode())
+                        await writer.drain()
 
-            data = await reader.read(100)
-            if (
-                self.expected_response is None
-                or self.expected_response in data.decode()
-            ):
-                return (True, "Expected response found")
-            return (False, "Unexpected server response")
-        finally:
-            writer.close()
-            await writer.wait_closed()
+                    data = await reader.read(100)
+                    if (
+                        self.expected_response is None
+                        or self.expected_response in data.decode()
+                    ):
+                        return (True, "Expected response found")
+                    return (False, "Unexpected server response")
+                finally:
+                    writer.close()
+                    await writer.wait_closed()
+        except TimeoutError:
+            return (False, "Timeout occurred")

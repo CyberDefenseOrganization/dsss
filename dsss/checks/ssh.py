@@ -39,40 +39,43 @@ class SSHCheck(AsyncCheck):
     @override
     async def check(self) -> tuple[bool, str | None]:
         try:
-            if self.availability_only:
-                async with asyncio.timeout(self.timeout_seconds):
+            async with asyncio.timeout(self.timeout_seconds):
+                if self.availability_only:
                     key = await asyncssh.get_server_host_key(self.host, self.port)
-                if key is None:
-                    return (False, "SSH server did not provide a host key.")
-                return (True, "SSH appears to be up.")
-
-            async with asyncssh.connect(
-                self.host,
-                self.port,
-                username=self.username,
-                password=self.password,
-                known_hosts=None,
-            ) as conn:
-                if self.command is None:
+                    if key is None:
+                        return (False, "SSH server did not provide a host key.")
                     return (True, "SSH appears to be up.")
 
-                result = await conn.run(self.command, check=False)
+                async with asyncssh.connect(
+                    self.host,
+                    self.port,
+                    username=self.username,
+                    password=self.password,
+                    known_hosts=None,
+                ) as conn:
+                    if self.command is None:
+                        return (True, "SSH appears to be up.")
 
-                stdout = str(result.stdout).strip()
-                expected_output = self.expected_output.strip()
+                    result = await conn.run(self.command, check=False)
 
-                if stdout == expected_output:
-                    return (
-                        True,
-                        f'Ran command "{self.command}" as user "{self.username}".\nRecieved: "{stdout}"',
-                    )
-                else:
-                    return (
-                        False,
-                        f'Ran command "{self.command}" as user "{self.username}".\nRecieved: "{stdout}", expected: "{expected_output}"',
-                    )
+                    stdout = str(result.stdout).strip()
+                    expected_output = self.expected_output.strip()
+
+                    if stdout == expected_output:
+                        return (
+                            True,
+                            f'Ran command "{self.command}" as user "{self.username}".\nRecieved: "{stdout}"',
+                        )
+                    else:
+                        return (
+                            False,
+                            f'Ran command "{self.command}" as user "{self.username}".\nRecieved: "{stdout}", expected: "{expected_output}"',
+                        )
         except asyncssh.PermissionDenied:
             return (
                 False,
                 f"Permission denied for user {self.username} on host {self.host}",
             )
+
+        except TimeoutError:
+            return (False, "Timeout occurred")

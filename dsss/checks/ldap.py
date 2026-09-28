@@ -24,7 +24,12 @@ class LDAPCheck(SyncCheck):
 
     @override
     def check(self) -> tuple[bool, str | None]:
-        server = Server(self.host, get_info=ALL, use_ssl=self.tls)
+        server = Server(
+            self.host,
+            get_info=ALL,
+            use_ssl=self.tls,
+            connect_timeout=self.timeout_seconds,
+        )
         with Connection(
             server, authentication="ANONYMOUS", receive_timeout=self.timeout_seconds
         ) as conn:
