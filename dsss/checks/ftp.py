@@ -1,20 +1,22 @@
 from typing import override
 import aioftp
 
-from dsss.checks.base import AsyncCheck
+from dsss.checks.base import AsyncCheck, Host, Port, Timeout
 
 
 class FTPCheck(AsyncCheck):
+    name = "FTP"
+
     username: str
     password: str
 
     def __init__(
         self,
-        host: str,
+        host: Host,
         username: str,
         password: str,
-        port: int = 21,
-        timeout_seconds: float = 10,
+        port: Port = 21,
+        timeout_seconds: Timeout = 10,
     ) -> None:
         super().__init__(host, port, timeout_seconds=timeout_seconds)
 

@@ -1,5 +1,5 @@
 from typing import override
-from dsss.checks.base import SyncCheck
+from dsss.checks.base import SyncCheck, Host, Timeout
 
 from ldap3 import Server, Connection, ALL
 
@@ -9,40 +9,17 @@ class LDAPCheck(SyncCheck):
     Performs an anonymous LDAP connection against a specified server
     """
 
-    username: str
-    password: str
-    required_content: str | None
-    sasl_mechanism: str
-    query: str | None
+    name = "LDAP"
+
     tls: bool
 
     def __init__(
         self,
-        host: str,
-        # username: str,
-        # password: str,
-        # sasl_mechanism: str = "EXTERNAL",
-        # query: str | None = None,
-        # expected_response: str | None = None,
+        host: Host,
         tls: bool = False,
-        timeout_seconds: float = 10,
+        timeout_seconds: Timeout = 10,
     ) -> None:
-        # self.expected_response = expected_response
-        # self.username = username
-        # self.password = password
-        # self.sasl_mechanism = sasl_mechanism
-        # self.query = query
-
         self.tls = tls
-        if not host.startswith("ldap://"):
-            host = "ldap://" + host
-
-        # if query is None and expected_response is not None:
-        #     # TODO: create custom Exception class for configration related exceptions
-        #     raise Exception(
-        #         "If LDAP query is not set, then expected response cannot be set"
-        #     )
-
         super().__init__(host, None, timeout_seconds=timeout_seconds)
 
     @override

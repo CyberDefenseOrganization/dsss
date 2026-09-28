@@ -1,11 +1,13 @@
-from typing import override
+from typing import Literal, override
 
-from dsss.checks.base import AsyncCheck
+from dsss.checks.base import AsyncCheck, Host, Port, Timeout
 
 import asyncssh
 
 
 class SSHCheck(AsyncCheck):
+    name = "SSH"
+
     username: str
     password: str
 
@@ -14,18 +16,18 @@ class SSHCheck(AsyncCheck):
 
     def __init__(
         self,
-        host: str,
+        host: Host,
         username: str,
         password: str,
-        port: int = 22,
-        timeout_seconds: float = 10,
-        command: str | None = "echo scoring",
+        port: Port = 22,
+        timeout_seconds: Timeout = 10,
+        command: str | None | Literal[False] = "echo scoring",
         expected_output: str = "scoring",
     ) -> None:
         super().__init__(host, port, timeout_seconds)
         self.username = username
         self.password = password
-        self.command = command
+        self.command = None if command is False else command
         self.expected_output = expected_output
 
     @override
@@ -42,7 +44,6 @@ class SSHCheck(AsyncCheck):
                     return (True, "SSH appears to be up.")
 
                 result = await conn.run(self.command, check=False)
-                await conn.run("exit")
 
                 stdout = str(result.stdout).strip()
                 expected_output = self.expected_output.strip()

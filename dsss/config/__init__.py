@@ -1,7 +1,7 @@
-from dsss.team import Team
-
 from dataclasses import dataclass
 from pathlib import Path
+
+from dsss.team import Team
 
 
 @dataclass
@@ -18,3 +18,5 @@ class Config:
     admin_password: str
     teams: dict[str, Team]
     logo_path: str | Path | None = None
+    source_path: Path | None = None
+    host: str = "0.0.0.0"

@@ -1,7 +1,7 @@
 import time
 import sqlite3
 import asyncio
-from asyncio import Task
+from itertools import accumulate
 from typing import TypedDict
 
 from dsss.config import Config
@@ -38,10 +38,9 @@ class Engine:
     # cached values to avoid querying the entire DB on every request
     # values are updated at the end of each round
     current_scores: dict[str, int]
-    current_overview: dict[str, TeamOverview] # total score at a each given round
-    current_score_history: dict[str, list[int]] # score gained each round
+    current_overview: dict[str, TeamOverview]  # total score at a each given round
+    current_score_history: dict[str, list[int]]  # score gained each round
     current_round_history: dict[str, list[int]]
-    
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -49,7 +48,7 @@ class Engine:
         self.current_round = 0
         self.last_round_finished = time.time()
         self.round_times = []
-        self.workers = WorkerPool(config.num_worker_processes)
+        self.workers = WorkerPool(config.num_worker_processes, config.source_path)
 
         self.db = sqlite3.connect(self.config.database_path)
         _ = self.db.execute("""
@@ -68,7 +67,7 @@ class Engine:
         )
         self.update_caches()
 
-    async def start(self):
+    async def start(self) -> None:
         logger.info("Starting Engine")
 
         if self.current_round != 0:
@@ -97,7 +96,7 @@ class Engine:
                 logger.warning(
                     f"Round checks took longer than specified target round time of {self.config.target_round_time} seconds by {abs(time_to_sleep):01.2f} seconds"
                 )
-          
+
             before_update_cache = time.time()
             self.update_caches()
             cache_time_taken = time.time() - before_update_cache
@@ -106,27 +105,27 @@ class Engine:
             self.last_round_finished = time.time()
             await asyncio.sleep(max(0, time_to_sleep))
 
-    async def run_round(self):
+    async def run_round(self) -> None:
         self.current_round += 1
 
-        tasks: list[Task[tuple[str, str, bool, str | None]]] = []
-        for _, team in self.config.teams.items():
-            for _, service in team.services.items():
-                tasks.append(asyncio.create_task(self._run_check(team, service)))
-
-        results = await asyncio.gather(*tasks)
+        results = await asyncio.gather(
+            *(
+                self._run_check(team, service)
+                for team in self.config.teams.values()
+                for service in team.services.values()
+            )
+        )
         self._store_results(self.current_round, results)
 
-    def update_caches(self):
+    def update_caches(self) -> None:
         """
         Populates all of the cached values commonly queried by the API.
         Should be called at the end of each round.
         """
         self.current_scores = self.query_scores()
         self.current_overview = self.query_overview()
-        self.current_score_history = self.query_rounds_cumulativee()
+        self.current_score_history = self.query_cumulative_rounds()
         self.current_round_history = self.query_rounds()
-
 
     def get_time_to_next_round(self) -> float:
         return max(
@@ -144,12 +143,8 @@ class Engine:
 
         scores: dict[str, int] = {}
         for team, service, success in rows:
-            if team not in scores:
-                scores[team] = 0
-
-            scores[team] += (
-                self.config.teams[team].services[service].point_value * success
-            )
+            points = self.config.teams[team].services[service].point_value
+            scores[team] = scores.get(team, 0) + points * success
 
         return scores
 
@@ -159,26 +154,15 @@ class Engine:
         """
         return self.get_scores_round(self.current_round)
 
-    def query_rounds_cumulativee(self) -> dict[str, list[int]]:
+    def query_cumulative_rounds(self) -> dict[str, list[int]]:
         """
         Returns the cumulative score at each round in the following format:
         dict[team, list[score]]
         """
-        teams = self.query_rounds()
-
-        cumulative_teams: dict[str, list[int]] = {}
-
-        for team, rounds in teams.items():
-            if team not in cumulative_teams:
-                cumulative_teams[team] = []
-
-            for index, round in enumerate(rounds):
-                cumulative_teams[team].append(round)
-
-                if index != 0:
-                    cumulative_teams[team][index] += cumulative_teams[team][index - 1]
-
-        return cumulative_teams
+        return {
+            team: list(accumulate(rounds))
+            for team, rounds in self.query_rounds().items()
+        }
 
     def query_rounds(self) -> dict[str, list[int]]:
         """
@@ -192,25 +176,16 @@ class Engine:
         rounds: dict[str, dict[int, int]] = {}
 
         for team, service, current_round, success in rows:
-            if team not in rounds:
-                rounds[team] = {}
-
-            if current_round not in rounds[team]:
-                rounds[team][current_round] = 0
-
-            rounds[team][current_round] += (
-                self.config.teams[team].services[service].point_value * success
+            team_rounds = rounds.setdefault(team, {})
+            points = self.config.teams[team].services[service].point_value
+            team_rounds[current_round] = (
+                team_rounds.get(current_round, 0) + points * success
             )
 
-        rounds_list: dict[str, list[int]] = {}
-
-        for team in rounds:
-            max_round = max(rounds[team].keys())
-            rounds_list[team] = [rounds[team].get(i, 0) for i in range(max_round + 1)][
-                1::
-            ]
-
-        return rounds_list
+        return {
+            team: [scores.get(round_id, 0) for round_id in range(1, max(scores) + 1)]
+            for team, scores in rounds.items()
+        }
 
     def query_overview(self) -> dict[str, TeamOverview]:
         """
@@ -263,7 +238,7 @@ class Engine:
 
     def _store_results(
         self, round_id: int, results: list[tuple[str, str, bool, str | None]]
-    ):
+    ) -> None:
         with self.db:
             _ = self.db.executemany(
                 "INSERT INTO results (round, team, service, success, message, timestamp) VALUES (?, ?, ?, ?, ?, ?)",

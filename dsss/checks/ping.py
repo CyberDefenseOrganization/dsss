@@ -1,22 +1,22 @@
-import socket
 import aioping
 from typing import override
 
-from dsss.checks.base import AsyncCheck
+from dsss.checks.base import AsyncCheck, Host, Timeout
 
 
 class PingCheck(AsyncCheck):
-    def __init__(self, host: str, timeout_seconds: float = 10) -> None:
+    name = "Ping"
+
+    def __init__(self, host: Host, timeout_seconds: Timeout = 10) -> None:
         super().__init__(host, None, timeout_seconds=timeout_seconds)
 
     @override
     async def check(self) -> tuple[bool, str | None]:
         try:
-            delay_ms: int = (
+            delay_ms = (
                 await aioping.ping(
                     self.host,
-                    timeout=int(self.timeout_seconds * 1000),
-                    family=socket.AddressFamily.AF_INET,
+                    timeout=self.timeout_seconds,
                 )
                 * 1000
             )

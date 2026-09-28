@@ -13,11 +13,6 @@ export function useStatusPoller<T extends PolledAPIResponse>(apiCall: () => Prom
     return useStatusPollerWithState(apiCall, data, setData, true);
 }
 
-export function useStatusPollerConditionally<T extends PolledAPIResponse>(apiCall: () => Promise<T>, shouldRun: boolean): T | null {
-    const [data, setData] = useState<T | null>(null);
-    return useStatusPollerWithState(apiCall, data, setData, shouldRun);
-}
-
 export function useStatusPollerWithState<T extends PolledAPIResponse>(
     apiCall: () => Promise<T>,
     data: T | null,

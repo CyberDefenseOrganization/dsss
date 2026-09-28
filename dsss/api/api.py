@@ -1,9 +1,10 @@
 import asyncio
-
 from contextlib import asynccontextmanager, suppress
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
 
-from dsss.main import get_config
+from dsss.config.loader import load_config
 from dsss.engine.engine import Engine
 import dsss.api.status
 import dsss.api.admin
@@ -11,7 +12,7 @@ import dsss.api.admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    config = get_config()
+    config = getattr(app.state, "config", None) or load_config()
     app.state.engine = Engine(config)
     try:
         async with app.state.engine.workers:
@@ -27,7 +28,9 @@ async def lifespan(app: FastAPI):
         app.state.engine.db.close()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+)
 
 api = APIRouter()
 
@@ -44,3 +47,9 @@ api.include_router(
 )
 
 app.include_router(api, prefix="/api")
+
+app.frontend(
+    "/",
+    directory=Path(__file__).resolve().parents[2] / "frontend" / "dist",
+    fallback="index.html",
+)

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import cast
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -7,14 +7,14 @@ from dsss.engine.engine import Engine
 
 
 def get_engine(request: Request) -> Engine:
-    return request.app.state.engine  # pyright: ignore[reportAny]
+    return cast(Engine, request.app.state.engine)
 
 
 def get_sessions(request: Request) -> list[str]:
-    return request.app.state.sessions  # pyright: ignore[reportAny]
+    return cast(list[str], request.app.state.sessions)
 
 
-def make_response(engine: Engine, **kwargs: Any) -> JSONResponse:  # pyright: ignore[reportExplicitAny]
+def make_response(engine: Engine, **kwargs: object) -> JSONResponse:
     return JSONResponse(
         {
             "currentRound": engine.current_round,

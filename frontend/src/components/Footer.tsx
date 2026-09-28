@@ -22,7 +22,7 @@ function Footer({ data, fullscreenTarget }: {
     const content = (
         <footer className={`mt-auto flex w-full shrink-0 flex-col items-center ${fullscreenTarget ? "" : "px-4 sm:px-6"}`}>
             <div className={`h-px w-full bg-[#e0e0e0] ${fullscreenTarget ? "" : "max-w-5xl"}`} />
-            <div className={`flex w-full items-center justify-between gap-2 py-4 font-semibold uppercase tracking-wider text-[#e0e0e0] sm:gap-4 sm:py-5 ${fullscreenTarget ? "flex-row text-lg sm:text-2xl" : "max-w-5xl flex-col text-xs sm:flex-row sm:text-sm"}`}>
+            <div className={`flex w-full items-center justify-between gap-2 py-4 font-semibold text-[#e0e0e0] sm:gap-4 sm:py-5 ${fullscreenTarget ? "flex-row text-lg sm:text-2xl" : "max-w-5xl flex-col text-xs sm:flex-row sm:text-sm"}`}>
                 <span>{data ? `Round ${String(data.currentRound).padStart(2, "0")}` : "Competition scoring"}</span>
                 <span>
                     {data

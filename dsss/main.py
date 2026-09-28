@@ -2,307 +2,44 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from collections.abc import Sequence
-from dsss.checks.base import BaseCheck
-from dsss.checks.ftp import FTPCheck
-from dsss.checks.http import HTTPCheck
-from dsss.checks.ldap import LDAPCheck
-from dsss.checks.ssh import SSHCheck
-from dsss.checks.tcp import TCPCheck
-from dsss.config import Config
-from dsss.team import Team
-from dsss.service import Service
-from dsss.checks.ping import PingCheck
-
-
-def make_team(name: str, service_list: Sequence[tuple[str, int, BaseCheck]]) -> Team:
-    services: dict[str, Service] = {}
-
-    for service_name, points, check in service_list:
-        services[service_name] = Service(service_name, points, check)
-
-    return Team(
-        name=name,
-        services=services,
-    )
-
-
-def get_config() -> Config:
-    teams = {}
-    team_names = [f"Team{i}" for i in range(1, 13)]
-
-    SCORING_USER = "scoring"
-    SCORING_PASSWORD = "scoring"
-    TIMEOUT = 20
-
-    for index, team_name in enumerate(team_names):
-        team_number = index + 1 + 20
-
-        services = [
-            (
-                "Router SSH",
-                10,
-                SSHCheck(
-                    f"172.16.{team_number}.1",
-                    SCORING_USER,
-                    SCORING_PASSWORD,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Router ICMP",
-                10,
-                PingCheck(
-                    f"172.16.{team_number}.1",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Router WebUI",
-                10,
-                HTTPCheck(
-                    f"http://172.16.{team_number}.1:80",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Backup ICMP",
-                10,
-                PingCheck(
-                    f"172.16.{team_number}.10",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Backup SSH",
-                10,
-                SSHCheck(
-                    f"172.16.{team_number}.10",
-                    SCORING_USER,
-                    SCORING_PASSWORD,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Backup FTP",
-                10,
-                FTPCheck(
-                    f"172.16.{team_number}.10",
-                    SCORING_USER,
-                    SCORING_PASSWORD,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Backup FileBrowser",
-                10,
-                HTTPCheck(
-                    f"http://172.16.{team_number}.10:8080/",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "IRC ICMP",
-                10,
-                PingCheck(
-                    f"172.16.{team_number}.20",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "IRC SSH",
-                10,
-                SSHCheck(
-                    f"172.16.{team_number}.20",
-                    SCORING_USER,
-                    SCORING_PASSWORD,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "IRC IRC Server",
-                10,
-                TCPCheck(
-                    host=f"172.16.{team_number}.20",
-                    port=6667,
-                    messages=None,
-                    expected_response=None,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "IRC TheLounge",
-                10,
-                HTTPCheck(
-                    f"http://172.16.{team_number}.20:8080",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "AmogOS ICMP",
-                10,
-                PingCheck(
-                    f"172.16.{team_number}.30",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "AmogOS SSH",
-                10,
-                SSHCheck(
-                    f"172.16.{team_number}.30",
-                    username=SCORING_USER,
-                    password="bb123#123",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "AmogOS Minecraft",
-                10,
-                TCPCheck(
-                    host=f"172.16.{team_number}.30",
-                    port=25565,
-                    messages=None,
-                    expected_response=None,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "AmogOS Grafana",
-                10,
-                HTTPCheck(
-                    f"http://172.16.{team_number}.30:3000",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "IRC TheLounge",
-                10,
-                HTTPCheck(
-                    f"http://172.16.{team_number}.20:8080",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Server ICMP",
-                5,
-                PingCheck(f"172.16.{team_number}.40", timeout_seconds=TIMEOUT),
-            ),
-            (
-                "Windows Server RDP",
-                5,
-                TCPCheck(
-                    host=f"172.16.{team_number}.40",
-                    port=3389,
-                    messages=None,
-                    expected_response=None,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Server IIS HTTP",
-                5,
-                HTTPCheck(
-                    f"http://172.16.{team_number}.40:80",
-                    "IIS Windows Server",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Server LDAP",
-                5,
-                LDAPCheck(
-                    f"ldap://172.16.{team_number}.40",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Workstation ICMP",
-                5,
-                PingCheck(
-                    f"172.16.{team_number}.50",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Workstation SSH",
-                5,
-                SSHCheck(
-                    f"172.16.{team_number}.50",
-                    username=SCORING_USER,
-                    password="bb123#123",
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Workstation RDP",
-                5,
-                TCPCheck(
-                    host=f"172.16.{team_number}.50",
-                    port=3389,
-                    messages=None,
-                    expected_response=None,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-            (
-                "Windows Workstation SMB",
-                5,
-                TCPCheck(
-                    host=f"172.16.{team_number}.50",
-                    port=445,
-                    messages=None,
-                    expected_response=None,
-                    timeout_seconds=TIMEOUT,
-                ),
-            ),
-        ]
-
-        teams[team_name] = make_team(team_name, services)
-
-    # teams = {name: make_team(name, service_defs) for name in team_names}
-
-    config = Config(
-        event_name_long="Great Dane Defense Competition",
-        event_name_short="GDDC",
-        organization_name_long="Cyber Defense Organization",
-        organization_name_short="CDO",
-        logo_path=Path(__file__).parent / "assets" / "shield.png",
-        port=8080,
-        target_round_time=35,
-        teams=teams,
-        admin_username="admin",
-        admin_password="bb123#123",
-        database_path="rounds.db",
-        num_worker_processes=32,
-    )
-
-    return config
+from dsss.config.loader import ConfigError, load_config
 
 
 def main():
-    # TODO: make this CLI a bit nicer
     parser = argparse.ArgumentParser(description="Damiens' Simple Scoring Suite")
     parser.add_argument(
-        "mode", choices=("server", "check"), nargs="?", default="server"
+        "mode", choices=("server", "check", "validate"), nargs="?", default="server"
+    )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="TOML configuration (default: config.toml)",
     )
     parser.add_argument(
         "--fd", type=int, help="Private IPC socket supplied by the server"
     )
     args = parser.parse_args()
+    if args.mode == "check" and args.fd is None:
+        parser.error("check mode requires --fd")
+    if args.mode != "check" and args.fd is not None:
+        parser.error("--fd is only used in check mode")
+    try:
+        config = load_config(args.config)
+    except ConfigError as error:
+        parser.error(str(error))
 
-    if args.mode == "check":
-        if args.fd is None:
-            parser.error("check mode requires --fd")
+    if args.mode == "validate":
+        print(f"Valid configuration: {config.source_path} ({len(config.teams)} teams)")
+    elif args.mode == "check":
         from dsss.engine.worker import run_worker
 
-        asyncio.run(run_worker(get_config(), args.fd))
+        asyncio.run(run_worker(config, args.fd))
     else:
-        if args.fd is not None:
-            parser.error("--fd is only used in check mode")
         import uvicorn
+        from dsss.api.api import app
 
-        uvicorn.run("dsss.api.api:app", host="0.0.0.0", port=8080, log_level="error")
+        app.state.config = config
+        uvicorn.run(app, host=config.host, port=config.port, log_level="error")
 
 
 if __name__ == "__main__":

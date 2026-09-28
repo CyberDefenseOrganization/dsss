@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "coal-rock", email = "colebrazinski15@gmail.com"},
 ]
-dependencies = ["aioping", "fastapi[standard]", "asyncssh>=2.21.1", "aiohttp>=3.13.2", "aioftp>=0.27.2", "bonsai>=1.5.4", "ldap3>=2.9.1", "aiosmb>=0.4.14", "smbprotocol>=1.15.0", "ruff>=0.14.11"]
+dependencies = ["aioping", "fastapi[standard]", "asyncssh>=2.21.1", "aiohttp>=3.13.2", "aioftp>=0.27.2", "bonsai>=1.5.4", "ldap3>=2.9.1", "aiosmb>=0.4.14", "smbprotocol>=1.15.0", "ruff>=0.14.11", "pydantic-settings>=2.15.0"]
 requires-python = "==3.13.*"
 readme = "README.md"
 license = {text = "MIT"}
@@ -17,7 +17,7 @@ distribution = false
 [tool.pdm.scripts]
 start = "python -m dsss.main"
 format = "ruff format ."
-lint = "ruff check ."
+lint.shell = "ruff check . && pylint --errors-only dsss"
 
 [tool.ruff]
 target-version = "py313"
@@ -30,3 +30,8 @@ select = ["E4", "E7", "E9", "F"]
 quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pylint>=4.0.9",
+]

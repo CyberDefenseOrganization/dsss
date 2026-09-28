@@ -1,7 +1,10 @@
 import asyncio
+from asyncio.subprocess import Process
 from contextlib import suppress
 import socket
 import sys
+from pathlib import Path
+from types import TracebackType
 from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict
@@ -12,7 +15,7 @@ from dsss.logger import get_logger
 
 logger = get_logger("Workers")
 
-MAGIC_READY_STR = b"bb123#123\n"
+WORKER_READY = b"ready\n"
 
 
 class CheckRequest(BaseModel):
@@ -32,12 +35,13 @@ class CheckResponse(BaseModel):
 class Worker:
     _current_worker_id: ClassVar[int] = 0
 
-    process: asyncio.subprocess.Process | None
+    process: Process | None
     reader: asyncio.StreamReader | None
     writer: asyncio.StreamWriter | None
     worker_id: int
 
-    def __init__(self) -> None:
+    def __init__(self, config_path: Path | None = None) -> None:
+        self.config_path = config_path
         self.process = None
         self.reader = None
         self.writer = None
@@ -57,6 +61,7 @@ class Worker:
                     "check",
                     "--fd",
                     str(child.fileno()),
+                    *(["--config", str(self.config_path)] if self.config_path else []),
                     pass_fds=(child.fileno(),),
                     stdin=asyncio.subprocess.DEVNULL,
                 )
@@ -64,7 +69,7 @@ class Worker:
                 child.close()
                 self.reader, self.writer = await asyncio.open_connection(sock=parent)
 
-                if await self.reader.readline() != MAGIC_READY_STR:
+                if await self.reader.readline() != WORKER_READY:
                     raise RuntimeError("Check worker failed to start")
 
         except BaseException:
@@ -106,7 +111,7 @@ class Worker:
             if process is not None:
                 try:
                     async with asyncio.timeout(2):
-                        _ = await process.wait()
+                        await process.wait()
 
                 except TimeoutError:
                     logger.warning(
@@ -128,11 +133,11 @@ class Worker:
 
 
 class WorkerPool:
-    def __init__(self, size: int) -> None:
-        self.workers: list[Worker] = [Worker() for _ in range(size)]
+    def __init__(self, size: int, config_path: Path | None = None) -> None:
+        self.workers: list[Worker] = [Worker(config_path) for _ in range(size)]
         self.idle: asyncio.Queue[Worker] = asyncio.Queue()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "WorkerPool":
         # attempt to spawn all workers
         try:
             logger.info("Spawning %s worker processes", len(self.workers))
@@ -158,8 +163,13 @@ class WorkerPool:
             await self.__aexit__(None, None, None)
             raise
 
-    async def __aexit__(self, _exc_type: None, exc_val: None, exc_tb: None):
-        _ = await asyncio.gather(*(worker.close() for worker in self.workers))
+    async def __aexit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_value: BaseException | None,
+        _traceback: TracebackType | None,
+    ) -> None:
+        await asyncio.gather(*(worker.close() for worker in self.workers))
 
     async def check(
         self, team: str, service: str, timeout: float
@@ -191,7 +201,7 @@ async def run_worker(config: Config, fd: int) -> None:
     reader, writer = await asyncio.open_connection(sock=socket.socket(fileno=fd))
 
     try:
-        writer.write(MAGIC_READY_STR)
+        writer.write(WORKER_READY)
         await writer.drain()
 
         while line := await reader.readline():

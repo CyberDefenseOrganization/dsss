@@ -1,4 +1,5 @@
 import logging
+from functools import cache
 from typing import override
 
 
@@ -19,12 +20,13 @@ class CustomFormatter(logging.Formatter):
     }
 
     @override
-    def format(self, record: logging.LogRecord):
+    def format(self, record: logging.LogRecord) -> str:
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
 
+@cache
 def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)

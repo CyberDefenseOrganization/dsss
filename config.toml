@@ -1,0 +1,261 @@
+# Paths are relative to this file.
+[branding]
+event_name_long = "Great Dane Defense Competition"
+event_name_short = "GDDC"
+organization_name_long = "Cyber Defense Organization"
+organization_name_short = "CDO"
+logo_path = "dsss/assets/shield.png"
+
+[engine]
+host = "0.0.0.0"
+port = 8080
+target_round_time = 35
+num_worker_processes = 32
+database_path = "rounds.db"
+
+[admin]
+username = "admin"
+password = "bb123#123"
+
+[defaults]
+timeout_seconds = 20
+username = "scoring"
+password = "scoring"
+
+# Shared services are inherited by every team. Hosts expand team variables.
+
+[[services]]
+name = "Router SSH"
+points = 10
+[services.check]
+type = "SSH"
+host = "172.16.{subnet}.1"
+port = 22
+command = "echo scoring"
+expected_output = "scoring"
+
+[[services]]
+name = "Router ICMP"
+points = 10
+[services.check]
+type = "Ping"
+host = "172.16.{subnet}.1"
+
+[[services]]
+name = "Router WebUI"
+points = 10
+[services.check]
+type = "HTTP"
+url = "http://172.16.{subnet}.1:80"
+
+[[services]]
+name = "Backup ICMP"
+points = 10
+[services.check]
+type = "Ping"
+host = "172.16.{subnet}.10"
+
+[[services]]
+name = "Backup SSH"
+points = 10
+[services.check]
+type = "SSH"
+host = "172.16.{subnet}.10"
+port = 22
+command = "echo scoring"
+expected_output = "scoring"
+
+[[services]]
+name = "Backup FTP"
+points = 10
+[services.check]
+type = "FTP"
+host = "172.16.{subnet}.10"
+port = 21
+
+[[services]]
+name = "Backup FileBrowser"
+points = 10
+[services.check]
+type = "HTTP"
+url = "http://172.16.{subnet}.10:8080/"
+
+[[services]]
+name = "IRC ICMP"
+points = 10
+[services.check]
+type = "Ping"
+host = "172.16.{subnet}.20"
+
+[[services]]
+name = "IRC SSH"
+points = 10
+[services.check]
+type = "SSH"
+host = "172.16.{subnet}.20"
+port = 22
+command = "echo scoring"
+expected_output = "scoring"
+
+[[services]]
+name = "IRC IRC Server"
+points = 10
+[services.check]
+type = "TCP"
+host = "172.16.{subnet}.20"
+port = 6667
+
+[[services]]
+name = "IRC TheLounge"
+points = 10
+[services.check]
+type = "HTTP"
+url = "http://172.16.{subnet}.20:8080"
+
+[[services]]
+name = "AmogOS ICMP"
+points = 10
+[services.check]
+type = "Ping"
+host = "172.16.{subnet}.30"
+
+[[services]]
+name = "AmogOS SSH"
+points = 10
+[services.check]
+type = "SSH"
+host = "172.16.{subnet}.30"
+port = 22
+password = "bb123#123"
+command = "echo scoring"
+expected_output = "scoring"
+
+[[services]]
+name = "AmogOS Minecraft"
+points = 10
+[services.check]
+type = "TCP"
+host = "172.16.{subnet}.30"
+port = 25565
+
+[[services]]
+name = "AmogOS Grafana"
+points = 10
+[services.check]
+type = "HTTP"
+url = "http://172.16.{subnet}.30:3000"
+
+[[services]]
+name = "Windows Server ICMP"
+points = 5
+[services.check]
+type = "Ping"
+host = "172.16.{subnet}.40"
+
+[[services]]
+name = "Windows Server RDP"
+points = 5
+[services.check]
+type = "TCP"
+host = "172.16.{subnet}.40"
+port = 3389
+
+[[services]]
+name = "Windows Server IIS HTTP"
+points = 5
+[services.check]
+type = "HTTP"
+required_content = "IIS Windows Server"
+url = "http://172.16.{subnet}.40:80"
+
+[[services]]
+name = "Windows Server LDAP"
+points = 5
+[services.check]
+type = "LDAP"
+tls = false
+host = "172.16.{subnet}.40"
+
+[[services]]
+name = "Windows Workstation ICMP"
+points = 5
+[services.check]
+type = "Ping"
+host = "172.16.{subnet}.50"
+
+[[services]]
+name = "Windows Workstation SSH"
+points = 5
+[services.check]
+type = "SSH"
+host = "172.16.{subnet}.50"
+port = 22
+password = "bb123#123"
+command = "echo scoring"
+expected_output = "scoring"
+
+[[services]]
+name = "Windows Workstation RDP"
+points = 5
+[services.check]
+type = "TCP"
+host = "172.16.{subnet}.50"
+port = 3389
+
+[[services]]
+name = "Windows Workstation SMB"
+points = 5
+[services.check]
+type = "TCP"
+host = "172.16.{subnet}.50"
+port = 445
+
+# Add team-specific service overrides under [[teams.services]].
+
+[[teams]]
+name = "Team1"
+variables = { subnet = 21 }
+
+[[teams]]
+name = "Team2"
+variables = { subnet = 22 }
+
+[[teams]]
+name = "Team3"
+variables = { subnet = 23 }
+
+[[teams]]
+name = "Team4"
+variables = { subnet = 24 }
+
+[[teams]]
+name = "Team5"
+variables = { subnet = 25 }
+
+[[teams]]
+name = "Team6"
+variables = { subnet = 26 }
+
+[[teams]]
+name = "Team7"
+variables = { subnet = 27 }
+
+[[teams]]
+name = "Team8"
+variables = { subnet = 28 }
+
+[[teams]]
+name = "Team9"
+variables = { subnet = 29 }
+
+[[teams]]
+name = "Team10"
+variables = { subnet = 30 }
+
+[[teams]]
+name = "Team11"
+variables = { subnet = 31 }
+
+[[teams]]
+name = "Team12"
+variables = { subnet = 32 }

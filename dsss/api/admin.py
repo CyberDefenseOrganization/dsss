@@ -74,15 +74,10 @@ async def login(request: Request, response: Response, login: Login):
 
 
 @router.get("/status")
-async def get_status(request: Request, session: str = Depends(authentication)):
+async def get_status(request: Request, _: str = Depends(authentication)):
     engine = get_engine(request)
 
-    return make_response(
-        engine,
-        **{
-            "success": True,
-        },
-    )
+    return make_response(engine, success=True)
 
 
 @router.post("/logout")
