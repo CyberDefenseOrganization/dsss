@@ -48,9 +48,36 @@ async def get_round_history(request: Request):
 
 @router.get("/cumulative_round_history")
 async def get_cumulative_round_history(request: Request):
+    """
+    Return scores at various rounds in history.
+
+    This endpoint handles sub-samples history automatically to prevent very large JSON 
+    blobs being sent over the network.
+    """
     engine = get_engine(request)
 
-    return make_response(engine, rounds=engine.current_score_history)
+    history = engine.current_score_history
+    num_rounds = max((len(scores) for scores in history.values()), default=0)
+    
+    # fuckass formula
+    interval = 1 if num_rounds <= 1000 else ((num_rounds + 9999) // 10000) * 10
+    round_numbers = list(range(interval, num_rounds + 1, interval))
+    
+    # always include last round
+    if num_rounds and (not round_numbers or round_numbers[-1] != num_rounds):
+        round_numbers.append(num_rounds)
+
+    return make_response(
+        engine,
+        roundNumbers=round_numbers,
+        rounds={
+            team: [
+                scores[round_id - 1] if round_id <= len(scores) else None
+                for round_id in round_numbers
+            ]
+            for team, scores in history.items()
+        },
+    )
 
 
 @router.get("/overview")

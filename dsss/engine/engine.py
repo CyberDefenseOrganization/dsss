@@ -38,9 +38,10 @@ class Engine:
     # cached values to avoid querying the entire DB on every request
     # values are updated at the end of each round
     current_scores: dict[str, int]
-    current_overview: dict[str, TeamOverview]  # total score at a each given round
-    current_score_history: dict[str, list[int]]  # score gained each round
-    current_round_history: dict[str, list[int]]
+    current_overview: dict[str, TeamOverview]
+    current_score_history: dict[str, list[int]]  # cumulative score at each round
+    current_round_history: dict[str, list[int]]  # score gained each round
+    _cached_round: int
 
     def __init__(self, config: Config) -> None:
         self.config = config
@@ -61,10 +62,18 @@ class Engine:
                 timestamp REAL
             )
         """)
+        _ = self.db.execute(
+            "CREATE INDEX IF NOT EXISTS results_round_idx ON results (round)"
+        )
 
         self.current_round = (
             self.db.execute("SELECT MAX(round) FROM results").fetchone()[0] or 0
         )
+        self.current_scores = {}
+        self.current_overview = {}
+        self.current_score_history = {}
+        self.current_round_history = {}
+        self._cached_round = 0
         self.update_caches()
 
     async def start(self) -> None:
@@ -119,13 +128,41 @@ class Engine:
 
     def update_caches(self) -> None:
         """
-        Populates all of the cached values commonly queried by the API.
-        Should be called at the end of each round.
+        Update caches with values obtained from current round.
+
         """
-        self.current_scores = self.query_scores()
-        self.current_overview = self.query_overview()
-        self.current_score_history = self.query_cumulative_rounds()
-        self.current_round_history = self.query_rounds()
+        if self.current_round <= self._cached_round:
+            return
+
+        rows = self.db.execute(
+            "SELECT team, service, round, success, message FROM results "
+            "WHERE round > ? AND round <= ? ORDER BY round",
+            (self._cached_round, self.current_round),
+        )
+
+        for team, service, round_id, success, message in rows:
+            points = self.config.teams[team].services[service].point_value * success
+            rounds = self.current_round_history.setdefault(team, [])
+            cumulative = self.current_score_history.setdefault(team, [])
+            missing = round_id - len(rounds)
+
+            if missing > 0:
+                rounds.extend([0] * missing)
+                cumulative.extend([self.current_scores.get(team, 0)] * missing)
+
+            rounds[round_id - 1] += points
+            cumulative[round_id - 1] += points
+            self.current_scores[team] = self.current_scores.get(team, 0) + points
+            overview = self.current_overview.setdefault(
+                team, {"score": 0, "services": {}}
+            )
+
+            overview["score"] = self.current_scores[team]
+            overview["services"][service] = ServiceStatus(
+                online=success > 0, message=message
+            )
+
+        self._cached_round = self.current_round
 
     def get_time_to_next_round(self) -> float:
         return max(

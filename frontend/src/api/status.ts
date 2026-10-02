@@ -10,7 +10,8 @@ export async function getScores(): Promise<ScoresResponse> {
 }
 
 export interface RoundHistoryResponse extends PolledAPIResponse {
-    rounds: Record<string, Array<number>>
+    rounds: Record<string, Array<number | null>>,
+    roundNumbers?: number[]
 }
 
 export async function getRoundHistory(): Promise<RoundHistoryResponse> {

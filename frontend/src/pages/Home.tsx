@@ -36,7 +36,7 @@ function Home() {
                                     <Fullscreen buttonLabel="Score by round" className={`flex flex-col gap-2 ${chartClass}`}>
                                         {() => (
                                             <div className="min-h-0 flex-1">
-                                                <RoundGraph numRounds={roundData.currentRound} roundData={roundData.rounds} />
+                                                <RoundGraph numRounds={roundData.currentRound} roundData={roundData.rounds} roundNumbers={roundData.roundNumbers} />
                                             </div>
                                         )}
                                     </Fullscreen>
