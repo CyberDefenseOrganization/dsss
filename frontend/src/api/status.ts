@@ -47,6 +47,7 @@ interface ServiceStatus {
 }
 
 export interface OverviewResponse extends PolledAPIResponse {
+    hosts: { name: string | null, services: { id: string, name: string }[] }[],
     overview: Record<string, TeamOverview>
 }
 

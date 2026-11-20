@@ -8,7 +8,7 @@ function Overview() {
     const overviewData: OverviewResponse | null = useStatusPoller(getOverview);
 
     return (
-        <PageShell data={overviewData}>
+        <PageShell data={overviewData} viewportWidthLimit>
             {overviewData ? (
                 <Fullscreen keyboard className="flex min-w-0 flex-col gap-4">
                     {(isFullscreen) => <OverviewTable overviewData={overviewData} fullscreen={isFullscreen} />}
