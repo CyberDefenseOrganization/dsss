@@ -141,7 +141,11 @@ class Engine:
         )
 
         for team, service, round_id, success, message in rows:
-            points = self.config.teams[team].services[service].point_value * success
+            point_value = self._point_value(team, service)
+            if point_value is None:
+                continue
+
+            points = point_value * success
             rounds = self.current_round_history.setdefault(team, [])
             cumulative = self.current_score_history.setdefault(team, [])
             missing = round_id - len(rounds)
@@ -180,7 +184,10 @@ class Engine:
 
         scores: dict[str, int] = {}
         for team, service, success in rows:
-            points = self.config.teams[team].services[service].point_value
+            points = self._point_value(team, service)
+            if points is None:
+                continue
+
             scores[team] = scores.get(team, 0) + points * success
 
         return scores
@@ -213,8 +220,11 @@ class Engine:
         rounds: dict[str, dict[int, int]] = {}
 
         for team, service, current_round, success in rows:
+            points = self._point_value(team, service)
+            if points is None:
+                continue
+
             team_rounds = rounds.setdefault(team, {})
-            points = self.config.teams[team].services[service].point_value
             team_rounds[current_round] = (
                 team_rounds.get(current_round, 0) + points * success
             )
@@ -235,6 +245,9 @@ class Engine:
         overview: dict[str, TeamOverview] = {}
 
         for team, service, success, message in rows:
+            if self._point_value(team, service) is None:
+                continue
+
             if team not in overview:
                 overview[team] = {"score": scores[team], "services": {}}
 
@@ -255,6 +268,17 @@ class Engine:
         Returns last round time in seconds
         """
         return self.round_times[-1]
+
+    def _point_value(self, team: str, service: str) -> int | None:
+        """
+        Returns the point value of a stored result, or None if the team or service
+        has since been removed from the configuration
+        """
+        configured = self.config.teams.get(team)
+        if configured is None or service not in configured.services:
+            return None
+
+        return configured.services[service].point_value
 
     async def _run_check(
         self, team: Team, service: Service
