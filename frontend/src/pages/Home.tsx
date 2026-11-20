@@ -10,7 +10,7 @@ function Home() {
     const roundData: RoundHistoryResponse | null = useStatusPoller(getRoundHistoryCumulative);
 
     return (
-        <PageShell data={scoreData}>
+        <PageShell data={scoreData} viewportWidthLimit>
             {scoreData && roundData ? (
                 <Fullscreen keyboard className="flex flex-col gap-6 sm:gap-8">
                     {(isFullscreen) => {

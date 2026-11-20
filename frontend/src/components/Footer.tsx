@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { PolledAPIResponse } from "../api/api";
 
-function Footer({ data, fullscreenTarget }: {
+function Footer({ data, fullscreenTarget, maxWidthClass }: {
     data: (PolledAPIResponse & { paused?: boolean }) | null;
     fullscreenTarget?: Element | null;
+    maxWidthClass: string;
 }) {
     const [timeLeft, setTimeLeft] = useState(0);
     const timeToNextRound = data?.timeToNextRound;
@@ -19,10 +20,11 @@ function Footer({ data, fullscreenTarget }: {
         return () => window.clearInterval(intervalId);
     }, [timeToNextRound]);
 
+    const widthLimit = fullscreenTarget ? "" : maxWidthClass;
     const content = (
         <footer className={`mt-auto flex w-full shrink-0 flex-col items-center ${fullscreenTarget ? "" : "px-4 sm:px-6"}`}>
-            <div className={`h-px w-full bg-[#e0e0e0] ${fullscreenTarget ? "" : "max-w-5xl"}`} />
-            <div className={`flex w-full items-center justify-between gap-2 py-4 font-semibold text-[#e0e0e0] sm:gap-4 sm:py-5 ${fullscreenTarget ? "flex-row text-lg sm:text-2xl" : "max-w-5xl flex-col text-xs sm:flex-row sm:text-sm"}`}>
+            <div className={`h-px w-full bg-[#e0e0e0] ${widthLimit}`} />
+            <div className={`flex w-full items-center justify-between gap-2 py-4 font-semibold text-[#e0e0e0] sm:gap-4 sm:py-5 ${widthLimit} ${fullscreenTarget ? "flex-row text-lg sm:text-2xl" : "flex-col text-xs sm:flex-row sm:text-sm"}`}>
                 <span>{data ? `Round ${String(data.currentRound).padStart(2, "0")}` : "Competition scoring"}</span>
                 <span>
                     {data

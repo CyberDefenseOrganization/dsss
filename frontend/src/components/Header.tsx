@@ -10,7 +10,7 @@ const routes = [
     { name: "Admin", path: "/admin" },
 ];
 
-function Header() {
+function Header({ maxWidthClass }: { maxWidthClass: string }) {
     const location = useLocation();
     const [open, setOpen] = useState(false);
     const [information, setInformation] = useState<InfoResponse | null>(null);
@@ -30,7 +30,7 @@ function Header() {
     const organizationName = information?.organization_name_long || information?.organization_name_short || eventName;
 
     return (
-        <header className="sticky top-0 z-30 mx-auto w-full max-w-5xl border-b border-[#e0e0e0] bg-black/95 backdrop-blur-sm">
+        <header className={`sticky top-0 z-30 mx-auto w-full border-b border-[#e0e0e0] bg-black/95 backdrop-blur-sm ${maxWidthClass}`}>
             <title>{information?.event_name_short || eventName}</title>
             <link rel="icon" href={information?.logo_url || "data:,"} />
             <div className="flex h-16 items-center justify-between gap-6 px-4 sm:px-6 md:h-18 md:px-4">
