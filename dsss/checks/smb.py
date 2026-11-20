@@ -21,6 +21,7 @@ class SMBCheck(SyncCheck):
         username: str | None = None,
         password: str | None = None,
         share: Annotated[str, Field(min_length=1, pattern=r"^[^\\/]+$")] | None = None,
+        require_signing: bool = True,
     ) -> None:
         if username is None or password is None:
             raise ValueError("username and password are required for SMB login checks")
@@ -28,6 +29,7 @@ class SMBCheck(SyncCheck):
         self.username = username
         self.password = password
         self.share = share
+        self.require_signing = require_signing
 
     @override
     def check(self) -> tuple[bool, str | None]:
@@ -40,6 +42,7 @@ class SMBCheck(SyncCheck):
                 port=self.port,
                 connection_timeout=self.timeout_seconds,
                 connection_cache=connection_cache,
+                require_signing=self.require_signing,
             )
             if self.share is not None:
                 listdir(
@@ -49,6 +52,7 @@ class SMBCheck(SyncCheck):
                     port=self.port,
                     connection_timeout=self.timeout_seconds,
                     connection_cache=connection_cache,
+                    require_signing=self.require_signing,
                 )
                 return (True, f'SMB share "{self.share}" is accessible.')
             return (True, "SMB login successful.")
