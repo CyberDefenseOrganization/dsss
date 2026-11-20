@@ -46,8 +46,14 @@ interface ServiceStatus {
     message: string
 }
 
+export interface CheckDetails {
+    type: string,
+    target: string
+}
+
 export interface OverviewResponse extends PolledAPIResponse {
     hosts: { name: string | null, services: { id: string, name: string }[] }[],
+    checks: Record<string, Record<string, CheckDetails>>,
     overview: Record<string, TeamOverview>
 }
 

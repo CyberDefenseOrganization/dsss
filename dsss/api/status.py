@@ -103,4 +103,14 @@ async def get_overview(request: Request):
             }
             for host, services in hosts.items()
         ],
+        checks={
+            team.name: {
+                service.id: {
+                    "type": service.check.name,
+                    "target": service.check.target,
+                }
+                for service in team.services.values()
+            }
+            for team in engine.config.teams.values()
+        },
     )

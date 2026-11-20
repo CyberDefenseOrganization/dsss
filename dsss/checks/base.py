@@ -183,6 +183,14 @@ class BaseCheck(ABC):
         self.port = port
         self.timeout_seconds = timeout_seconds
 
+    @property
+    def target(self) -> str:
+        """
+        Human readable description of what this check connects to
+        """
+        host = f"[{self.host}]" if ":" in self.host else self.host
+        return host if self.port is None else f"{host}:{self.port}"
+
 
 class AsyncCheck(BaseCheck, ABC):
     @abstractmethod
@@ -203,6 +211,11 @@ class _RandomAsyncCheck(AsyncCheck, register=False):
         super().__init__(template.host, template.port, timeout)
         self.factory = factory
         self.name = template.name
+        self.template = template
+
+    @property
+    def target(self) -> str:
+        return self.template.target
 
     async def check(self) -> tuple[bool, str | None]:
         check = self.factory()
@@ -217,6 +230,11 @@ class _RandomSyncCheck(SyncCheck, register=False):
         super().__init__(template.host, template.port, timeout)
         self.factory = factory
         self.name = template.name
+        self.template = template
+
+    @property
+    def target(self) -> str:
+        return self.template.target
 
     def check(self) -> tuple[bool, str | None]:
         check = self.factory()

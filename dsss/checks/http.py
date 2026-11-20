@@ -26,6 +26,11 @@ class HTTPCheck(AsyncCheck):
         host = validate_host((url.host or "").removeprefix("[").removesuffix("]"))
         super().__init__(host, url.port, timeout_seconds=timeout_seconds)
 
+    @property
+    @override
+    def target(self) -> str:
+        return self.url
+
     @override
     async def check(self) -> tuple[bool, str | None]:
         try:

@@ -31,6 +31,12 @@ class DNSCheck(AsyncCheck):
             raise ValueError(f"Invalid DNS query: {error}") from error
         self.availability_only = availability_only
 
+    @property
+    @override
+    def target(self) -> str:
+        record_type = dns.rdatatype.to_text(self.record_type)
+        return f"{record_type} {self.query} @ {super().target}"
+
     @override
     async def check(self) -> tuple[bool, str | None]:
         request = dns.message.make_query(self.query, self.record_type)
