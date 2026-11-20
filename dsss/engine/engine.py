@@ -261,17 +261,17 @@ class Engine:
     ) -> tuple[str, str, bool, str | None]:
         try:
             success, msg = await self.workers.check(
-                team.name, service.name, service.check.timeout_seconds
+                team.name, service.id, service.check.timeout_seconds
             )
-            return (team.name, service.name, success, msg)
+            return (team.name, service.id, success, msg)
         except TimeoutError:
-            return (team.name, service.name, False, "Timeout occurred")
+            return (team.name, service.id, False, "Timeout occurred")
 
         except Exception as e:
             logger.warning(
-                f"Unhandled exception while performing check '{service.name}': {repr(e)}"
+                f"Unhandled exception while performing check '{service.id}': {repr(e)}"
             )
-            return (team.name, service.name, False, f"Error: {e}")
+            return (team.name, service.id, False, f"Error: {e}")
 
     def _store_results(
         self, round_id: int, results: list[tuple[str, str, bool, str | None]]

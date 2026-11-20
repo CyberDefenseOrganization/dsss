@@ -25,7 +25,8 @@ password = "scoring"
 # Shared services are inherited by every team. Hosts expand team variables.
 
 [[services]]
-name = "Router SSH"
+host = "Router"
+name = "SSH"
 points = 10
 [services.check]
 type = "SSH"
@@ -35,28 +36,32 @@ command = "echo scoring"
 expected_output = "scoring"
 
 [[services]]
-name = "Router ICMP"
+host = "Router"
+name = "ICMP"
 points = 10
 [services.check]
 type = "Ping"
 host = "172.16.{subnet}.1"
 
 [[services]]
-name = "Router WebUI"
+host = "Router"
+name = "WebUI"
 points = 10
 [services.check]
 type = "HTTP"
 url = "http://172.16.{subnet}.1:80"
 
 [[services]]
-name = "Backup ICMP"
+host = "Backup"
+name = "ICMP"
 points = 10
 [services.check]
 type = "Ping"
 host = "172.16.{subnet}.10"
 
 [[services]]
-name = "Backup SSH"
+host = "Backup"
+name = "SSH"
 points = 10
 [services.check]
 type = "SSH"
@@ -66,7 +71,8 @@ command = "echo scoring"
 expected_output = "scoring"
 
 [[services]]
-name = "Backup FTP"
+host = "Backup"
+name = "FTP"
 points = 10
 [services.check]
 type = "FTP"
@@ -74,21 +80,24 @@ host = "172.16.{subnet}.10"
 port = 21
 
 [[services]]
-name = "Backup FileBrowser"
+host = "Backup"
+name = "FileBrowser"
 points = 10
 [services.check]
 type = "HTTP"
 url = "http://172.16.{subnet}.10:8080/"
 
 [[services]]
-name = "IRC ICMP"
+host = "IRC"
+name = "ICMP"
 points = 10
 [services.check]
 type = "Ping"
 host = "172.16.{subnet}.20"
 
 [[services]]
-name = "IRC SSH"
+host = "IRC"
+name = "SSH"
 points = 10
 [services.check]
 type = "SSH"
@@ -98,7 +107,8 @@ command = "echo scoring"
 expected_output = "scoring"
 
 [[services]]
-name = "IRC IRC Server"
+host = "IRC"
+name = "IRC Server"
 points = 10
 [services.check]
 type = "TCP"
@@ -106,21 +116,24 @@ host = "172.16.{subnet}.20"
 port = 6667
 
 [[services]]
-name = "IRC TheLounge"
+host = "IRC"
+name = "TheLounge"
 points = 10
 [services.check]
 type = "HTTP"
 url = "http://172.16.{subnet}.20:8080"
 
 [[services]]
-name = "AmogOS ICMP"
+host = "AmogOS"
+name = "ICMP"
 points = 10
 [services.check]
 type = "Ping"
 host = "172.16.{subnet}.30"
 
 [[services]]
-name = "AmogOS SSH"
+host = "AmogOS"
+name = "SSH"
 points = 10
 [services.check]
 type = "SSH"
@@ -131,7 +144,8 @@ command = "echo scoring"
 expected_output = "scoring"
 
 [[services]]
-name = "AmogOS Minecraft"
+host = "AmogOS"
+name = "Minecraft"
 points = 10
 [services.check]
 type = "TCP"
@@ -139,21 +153,24 @@ host = "172.16.{subnet}.30"
 port = 25565
 
 [[services]]
-name = "AmogOS Grafana"
+host = "AmogOS"
+name = "Grafana"
 points = 10
 [services.check]
 type = "HTTP"
 url = "http://172.16.{subnet}.30:3000"
 
 [[services]]
-name = "Windows Server ICMP"
+host = "Windows Server"
+name = "ICMP"
 points = 5
 [services.check]
 type = "Ping"
 host = "172.16.{subnet}.40"
 
 [[services]]
-name = "Windows Server RDP"
+host = "Windows Server"
+name = "RDP"
 points = 5
 [services.check]
 type = "TCP"
@@ -161,7 +178,8 @@ host = "172.16.{subnet}.40"
 port = 3389
 
 [[services]]
-name = "Windows Server IIS HTTP"
+host = "Windows Server"
+name = "IIS HTTP"
 points = 5
 [services.check]
 type = "HTTP"
@@ -169,7 +187,8 @@ required_content = "IIS Windows Server"
 url = "http://172.16.{subnet}.40:80"
 
 [[services]]
-name = "Windows Server LDAP"
+host = "Windows Server"
+name = "LDAP"
 points = 5
 [services.check]
 type = "LDAP"
@@ -177,14 +196,16 @@ tls = false
 host = "172.16.{subnet}.40"
 
 [[services]]
-name = "Windows Workstation ICMP"
+host = "Windows Workstation"
+name = "ICMP"
 points = 5
 [services.check]
 type = "Ping"
 host = "172.16.{subnet}.50"
 
 [[services]]
-name = "Windows Workstation SSH"
+host = "Windows Workstation"
+name = "SSH"
 points = 5
 [services.check]
 type = "SSH"
@@ -195,7 +216,8 @@ command = "echo scoring"
 expected_output = "scoring"
 
 [[services]]
-name = "Windows Workstation RDP"
+host = "Windows Workstation"
+name = "RDP"
 points = 5
 [services.check]
 type = "TCP"
@@ -203,7 +225,8 @@ host = "172.16.{subnet}.50"
 port = 3389
 
 [[services]]
-name = "Windows Workstation SMB"
+host = "Windows Workstation"
+name = "SMB"
 points = 5
 [services.check]
 type = "TCP"

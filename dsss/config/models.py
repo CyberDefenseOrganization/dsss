@@ -53,15 +53,21 @@ class CheckDefaults(Settings):
 
 class ServiceOverride(Settings):
     name: NonEmpty
+    host: NonEmpty | None = None
+    id: NonEmpty | None = None
     points: Annotated[int, Field(ge=0)] | None = None
     check: dict[str, object] = Field(default_factory=dict)
 
+    @property
+    def result_key(self) -> str:
+        return self.id or (f"{self.host} {self.name}" if self.host else self.name)
+
 
 def unique_services(services: list[ServiceOverride]) -> list[ServiceOverride]:
-    names = [service.name for service in services]
+    names = [service.result_key for service in services]
 
     if len(names) != len(set(names)):
-        raise ValueError("Service names must be unique")
+        raise ValueError("Service result IDs must be unique")
 
     return services
 
@@ -115,6 +121,8 @@ class Document(BaseSettings):
 
 class ServiceSettings(Settings):
     name: NonEmpty
+    host: NonEmpty | None = None
+    id: NonEmpty | None = None
     points: Annotated[int, Field(ge=0)]
     check: InstanceOf[BaseCheck]
 

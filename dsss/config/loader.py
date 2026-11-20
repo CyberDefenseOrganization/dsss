@@ -26,11 +26,13 @@ def build_teams(document: Document, source: Path) -> dict[str, Team]:
     location = str(source)
     try:
         templates = {
-            service.name: service.model_dump(exclude_none=True)
+            service.result_key: service.model_dump(exclude_none=True)
             for service in document.services
         }
         defaults = document.defaults.model_dump(exclude_none=True)
         teams = {}
+        # (host, name) seen for each result ID, which must match across teams
+        labels = {}
         for team in document.teams:
             context = {
                 "defaults": defaults,
@@ -38,9 +40,9 @@ def build_teams(document: Document, source: Path) -> dict[str, Team]:
             }
             definitions = dict(templates)
             for override in team.services:
-                original = definitions.get(override.name, {})
+                original = definitions.get(override.result_key, {})
                 value = override.model_dump(exclude_none=True)
-                definitions[override.name] = {
+                definitions[override.result_key] = {
                     **original,
                     **value,
                     "check": {**original.get("check", {}), **value["check"]},
@@ -49,7 +51,12 @@ def build_teams(document: Document, source: Path) -> dict[str, Team]:
             for name, definition in definitions.items():
                 location = f"{source}, team {team.name}, service {name}"
                 service = ServiceSettings.model_validate(definition, context=context)
-                services[name] = Service(name, service.points, service.check)
+                label = (service.host, service.name)
+                if labels.setdefault(name, label) != label:
+                    raise ConfigError(
+                        f"{location}: host and name must match across teams"
+                    )
+                services[name] = Service(name, service.points, service.check, *label)
             teams[team.name] = Team(team.name, services)
     except ValidationError as error:
         raise validation_error(location, error) from None

@@ -51,18 +51,18 @@ async def get_cumulative_round_history(request: Request):
     """
     Return scores at various rounds in history.
 
-    This endpoint handles sub-samples history automatically to prevent very large JSON 
+    This endpoint handles sub-samples history automatically to prevent very large JSON
     blobs being sent over the network.
     """
     engine = get_engine(request)
 
     history = engine.current_score_history
     num_rounds = max((len(scores) for scores in history.values()), default=0)
-    
+
     # fuckass formula
     interval = 1 if num_rounds <= 1000 else ((num_rounds + 9999) // 10000) * 10
     round_numbers = list(range(interval, num_rounds + 1, interval))
-    
+
     # always include last round
     if num_rounds and (not round_numbers or round_numbers[-1] != num_rounds):
         round_numbers.append(num_rounds)
@@ -84,4 +84,23 @@ async def get_cumulative_round_history(request: Request):
 async def get_overview(request: Request):
     engine = get_engine(request)
 
-    return make_response(engine, overview=engine.current_overview)
+    # group service columns by host, preserving configuration order
+    hosts: dict[str | None, dict[str, str]] = {}
+    for team in engine.config.teams.values():
+        for service in team.services.values():
+            hosts.setdefault(service.host, {})[service.id] = service.name
+
+    return make_response(
+        engine,
+        overview=engine.current_overview,
+        hosts=[
+            {
+                "name": host,
+                "services": [
+                    {"id": service_id, "name": name}
+                    for service_id, name in services.items()
+                ],
+            }
+            for host, services in hosts.items()
+        ],
+    )
